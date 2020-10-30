@@ -1,0 +1,16 @@
+package com.example.demo;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+
+@Entity
+//@Table(name="Produto")
+public class Produto {
+	
+	@Column
+	private int id;
+	
+	@Column
+	private String nome;
+
+}
