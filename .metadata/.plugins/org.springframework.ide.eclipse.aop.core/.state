@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <aop-reference-model>
+<aop-project name="helloAtividade1"/>
+<aop-project name="helloAtividade2"/>
+<aop-project name="drogaria"/>
+<aop-project name="webmvc"/>
+<aop-project name="dados2"/>
+<aop-project name="blogPessoal"/>
 <aop-project name="dados"/>
 </aop-reference-model>
