@@ -18,6 +18,7 @@ org.eclipse.jface.textfont=1|Consolas|12.0|0|WINDOWS|1|0|0|0|0|0|0|0|0|1|0|0|0|0
 org.eclipse.mylyn.wikitext.ui.presentation.textFont=1|Consolas|12.0|0|WINDOWS|1|0|0|0|0|0|0|0|0|1|0|0|0|0|Consolas;
 org.eclipse.pde.internal.ui.compare.ManifestContentMergeViewer=1|Consolas|12.0|0|WINDOWS|1|0|0|0|0|0|0|0|0|1|0|0|0|0|Consolas;
 org.eclipse.pde.internal.ui.compare.PluginContentMergeViewer=1|Consolas|12.0|0|WINDOWS|1|0|0|0|0|0|0|0|0|1|0|0|0|0|Consolas;
+org.eclipse.ui.commands=<?xml version\="1.0" encoding\="UTF-8"?>\r\n<org.eclipse.ui.commands>\r\n<keyBinding contextId\="org.eclipse.ui.textEditorScope" keyConfigurationId\="org.eclipse.ui.defaultAcceleratorConfiguration" keySequence\="ALT+CTRL+ARROW_UP"/>\r\n<keyBinding commandId\="org.eclipse.ui.edit.text.copyLineUp" contextId\="org.eclipse.ui.textEditorScope" keyConfigurationId\="org.eclipse.ui.defaultAcceleratorConfiguration" keySequence\="ALT+CTRL+D"/>\r\n</org.eclipse.ui.commands>
 org.eclipse.wst.jsdt.internal.ui.compare.JavaMergeViewer=1|Consolas|12.0|0|WINDOWS|1|0|0|0|0|0|0|0|0|1|0|0|0|0|Consolas;
 org.eclipse.wst.jsdt.ui.editors.textfont=1|Consolas|12.0|0|WINDOWS|1|0|0|0|0|0|0|0|0|1|0|0|0|0|Consolas;
 org.eclipse.wst.sse.ui.textfont=1|Consolas|12.0|0|WINDOWS|1|0|0|0|0|0|0|0|0|1|0|0|0|0|Consolas;

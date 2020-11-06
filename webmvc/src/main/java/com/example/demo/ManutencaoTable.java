@@ -22,8 +22,16 @@ public class ManutencaoTable {
 	private String nome;
 	
 	@Column
-	@JsonFormat(pattern="yyyy-mm-dd")
-	private Date data;
+	private String categoria;
+	
+	
+	public String getCategoria() {
+		return categoria;
+	}
+	public void setCategoria(String categoria) {
+		this.categoria = categoria;
+	}
+	
 	@Column
 	private boolean pago;
 	
@@ -40,12 +48,7 @@ public class ManutencaoTable {
 	public void setNome(String nome) {
 		this.nome = nome;
 	}
-	public Date getData() {
-		return data;
-	}
-	public void setData(Date data) {
-		this.data = data;
-	}
+
 	public boolean isPago() {
 		return pago;
 	}

@@ -5,7 +5,259 @@
   <link rel="self" href="https://spring.io/blog.atom" />
   <id>http://spring.io/blog.atom</id>
   <icon>https://spring.io/favicon.ico</icon>
-  <updated>2020-11-02T16:18:19Z</updated>
+  <updated>2020-11-06T09:31:06Z</updated>
+  <entry>
+    <title>Spring Data 2020.0 - New and Noteworthy - A general Overview</title>
+    <link rel="alternate" href="https://spring.io/blog/2020/11/06/spring-data-2020-0-new-and-noteworthy-a-general-overview" />
+    <category term="engineering" label="Engineering" />
+    <author>
+      <name>Christoph Strobl</name>
+    </author>
+    <id>tag:spring.io,2020-11-04:4254</id>
+    <updated>2020-11-06T09:31:06Z</updated>
+    <content type="html">&lt;p&gt;Spring Data 2020.0, based on &lt;a href="https://spring.io/blog/2020/10/27/spring-framework-5-3-goes-ga"&gt;Spring Framework 5.3&lt;/a&gt;, is out and with it, a ton of new features across the various stores, which are covered by the individual modules. While posting highlights along with the milestone announcements, we wanted to give you a more detailed description of the new features in a series of blog posts. These posts will cover, among other things:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Reactive Context Access features in Data Commons.&lt;/li&gt;
+  &lt;li&gt;Lifecycle callbacks in R2DBC.&lt;/li&gt;
+  &lt;li&gt;General Repository and store-specific Redis Cache Metrics.&lt;/li&gt;
+  &lt;li&gt;Neo4J reactive repositories.&lt;/li&gt;
+  &lt;li&gt;Paging repository APIs for Spring Data for Apache Geode .&lt;/li&gt;
+  &lt;li&gt;Geoshape, index, and reactive search improvements for Spring Data Elasticsearch.&lt;/li&gt;
+  &lt;li&gt;Partial filter and aggregation hints in MongoDB.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;@Bean&lt;/code&gt; row mappers for the JDBC module.&lt;/li&gt;
+  &lt;li&gt;Per-statement key spaces definition for the Apache Cassandra abstraction.&lt;/li&gt;
+  &lt;li&gt;Declarative Couchbase N1QL queries.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In this first part, we take the time to cover some general topics and certain aspects of the commons module that have effect on the store-specific implementations.&lt;/p&gt;
+&lt;p&gt;We start with the most obvious change: The versioning scheme.&lt;br/&gt;After following a lexical ordering (honoring famous computer scientists) for more than 7 years, we switched to a &lt;a href="https://calver.org/"&gt;CalVer&lt;/a&gt;-based versioning scheme.&lt;br/&gt;This will mainly affect those of you who manage versions of Spring Data artifacts through the &lt;code&gt;spring-data-releasetrain&lt;/code&gt; artifact, which changed to &lt;code&gt;spring-data-bom&lt;/code&gt; and the new scheme.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint bash"&gt;org.springframework.data&#xD;
+spring-data-bom&#xD;
+2020.0.0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The individual modules continue to use the numeric versioning scheme.&lt;/p&gt;
+&lt;p&gt;Despite those infrastructural changes, the current release has a clear focus on extending the reactive story, more application insight, metrics, and a better developer experience when working with GraalVM native images. Still, we took the time to add some bits and pieces here and there, to hopefully make your everyday work a little more convenient.&lt;/p&gt;
+&lt;p&gt;One of those enhancements was to add support for &lt;code&gt;java.lang.Optional&lt;/code&gt; within projections. It is not a game changer, but it nevertheless lets if you want to avoid null values.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint java"&gt;interface User {&#xD;
+&#xD;
+	String getNickname();&#xD;
+	Optional&amp;lt;byte[]&amp;gt; getPicture();&#xD;
+}&#xD;
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Working on performance insights (more on that a little later), we now delay repository initialization till its first use, which speeds up application startup times.&lt;/p&gt;
+&lt;p&gt;We also took the time to &lt;a href="https://projectlombok.org/features/delombok"&gt;Delombok&lt;/a&gt; the entire production codebase for improved readability and debugging.&lt;/p&gt;&lt;h2&gt;&lt;a href="#reactive-context-access" class="anchor" name="reactive-context-access"&gt;&lt;/a&gt;Reactive Context Access&lt;/h2&gt;
+&lt;p&gt;This release contributes another important piece on its path to completing the reactive story. The addition of reactive context access let us work on features such as reactive auditing and SpEL context extensions evaluation inside a reactive flow.&lt;br/&gt;Till now, both Auditing and SpEL were, to a certain degree, already possible. The missing piece was the ability to access contextual details, such as an authentication principal that is typically provided by Spring Security in WebFlux arrangements.&lt;/p&gt;
+&lt;p&gt;When it comes to context, you have two options:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Pass the context along with the invocation&lt;/li&gt;
+  &lt;li&gt;Store contextual details out of band (for example, by using &lt;code&gt;ThreadLocal&lt;/code&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The imperative variants of auditing and SpEL context extensions rely on &lt;code&gt;ThreadLocal&lt;/code&gt; storage. However, subscribing to a reactive pipeline removes any assumptions on which threads the pipeline is going to materialize. Therefore, this approach becomes unusable. This is where the second option comes into play, passing contextual details along with the invocation. Project Reactor&amp;rsquo;s &lt;code&gt;Context&lt;/code&gt; feature allows attaching contextual data to a subscription. To access the context, an API is required to use &lt;code&gt;Publisher&lt;/code&gt; types. With this release, we therefore introduced reactive API variants for auditing with &lt;code&gt;ReactiveAuditorAware&lt;/code&gt; and &lt;code&gt;ReactiveEvaluationContextExtension&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint java"&gt;interface ReactiveAuditorAware&amp;lt;T&amp;gt; {  &#xD;
+	Mono&amp;lt;T&amp;gt; getCurrentAuditor();  &#xD;
+}&#xD;
+&#xD;
+interface ReactiveEvaluationContextExtension extends ExtensionIdAware {  &#xD;
+	Mono&amp;lt;? extends EvaluationContextExtension&amp;gt; getExtension();  &#xD;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You can expose implementations of both interfaces as Spring beans. Spring Data picks them up and uses them for reactive auditing, respective of context extension.&lt;/p&gt;&lt;h2&gt;&lt;a href="#reactive-auditing" class="anchor" name="reactive-auditing"&gt;&lt;/a&gt;Reactive Auditing&lt;/h2&gt;
+&lt;p&gt;Reactive Auditing associates auditable entities with a timestamp and the current user (&amp;ldquo;auditor&amp;rdquo;). Properties annotated with &lt;code&gt;@CreatedBy&lt;/code&gt; or &lt;code&gt;@LastModifiedDate&lt;/code&gt; are populated by Spring Data upon insert and update. In previous versions, properties annotated with &lt;code&gt;@CreatedDate&lt;/code&gt; and &lt;code&gt;@LastModifiedDate&lt;/code&gt; were updated through entity callbacks. As of this release, the auditor is propagated from &lt;code&gt;ReactiveAuditorAware&lt;/code&gt; into the entity by using a dedicated entity callback.&lt;/p&gt;
+&lt;p&gt;An example implementation for &lt;code&gt;ReactiveAuditorAware&lt;/code&gt; that uses Spring Security&amp;rsquo;s &lt;code&gt;ReactiveSecurityContextHolder&lt;/code&gt; could look like:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint java"&gt;class ReactiveUsernameAuditor implements ReactiveAuditorAware&amp;lt;String&amp;gt;{  &#xD;
+&#xD;
+  	@Override  &#xD;
+  	public Mono&amp;lt;String&amp;gt; getCurrentAuditor() {  &#xD;
+    	  	return ReactiveSecurityContextHolder.getContext()  &#xD;
+              	  	.map(SecurityContext::getAuthentication)  &#xD;
+              	  	.map(Authentication::getPrincipal)  &#xD;
+              	  	.map(Object::toString);  &#xD;
+  	}&#xD;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You need two steps to enable reactive auditing for your store module. First, enable reactive auditing through your store-specific &lt;code&gt;@EnableReactive…Auditing&lt;/code&gt; annotation. Second, register a &lt;code&gt;ReactiveAuditorAware&lt;/code&gt; bean. Reactive auditing is supported for Cassandra, Elasticsearch, MongoDB, Neo4j, and R2DBC.&lt;/p&gt;
+&lt;p&gt;The following configuration snippet shows how to enable reactive auditing. You can find the &lt;a href="https://github.com/spring-projects/spring-data-examples/tree/master/cassandra/example/src/main/java/example/springdata/cassandra/auditing"&gt;full example&lt;/a&gt; on Github.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint java"&gt;@Configuration  &#xD;
+@EnableReactiveCassandraAuditing  &#xD;
+class ApplicationConfiguration {  &#xD;
+  &#xD;
+	@Bean  &#xD;
+	ReactiveAuditorAware&amp;lt;String&amp;gt; reactiveAuditorAware() {  &#xD;
+		return () -&amp;gt; Mono.just(&amp;quot;the-static-auditor-name&amp;quot;);  &#xD;
+	}  &#xD;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that the example results in a static auditor that is named &lt;code&gt;the-static-auditor-name&lt;/code&gt;. Using a dynamic auditor derived from the context requires additional components, such as Spring Security and WebFlux. Note that several stores previously enabled the date-part of reactive auditing through &lt;code&gt;@Enable…Auditing&lt;/code&gt;. With the introduction of &lt;code&gt;@EnableReactive…Auditing&lt;/code&gt;, that is no longer the case, and &lt;code&gt;@Enable…Auditing&lt;/code&gt; enables solely imperative auditing. Make sure to adopt your configuration accordingly if you require reactive auditing.&lt;/p&gt;&lt;h2&gt;&lt;a href="#reactive-spring-expression-language-ldquo-spel-rdquo-context-extensions" class="anchor" name="reactive-spring-expression-language-ldquo-spel-rdquo-context-extensions"&gt;&lt;/a&gt;Reactive Spring Expression Language (&amp;ldquo;SpEL&amp;rdquo;) Context Extensions&lt;/h2&gt;
+&lt;p&gt;SpEL Context extensions represent an SPI to allow plugging in application- or library-specific extensions that provide functionality that can be consumed in various places by using SpEL expressions. Context extensions can hold application-specific state, expose domain-specific functionality, or give access to contextual data associated with an incoming application request. A typical example for a SpEL Context feature is accessing the security context that is associated with a HTTP request issued by an authenticated or anonymous application user.&lt;/p&gt;
+&lt;p&gt;Similar to reactive auditing, any per-request context needs to be retrieved from the subscriber &lt;code&gt;Context&lt;/code&gt;. In this release, we introduced &lt;code&gt;ReactiveEvaluationContextProvider&lt;/code&gt;, which is a reactive variant of &lt;code&gt;EvaluationContextProvider&lt;/code&gt;. &lt;code&gt;ReactiveEvaluationContextProvider&lt;/code&gt; allows deferred &lt;code&gt;EvaluationContext&lt;/code&gt; retrieval. By returning &lt;code&gt;Mono&lt;/code&gt;, the context provider can access the subscriber &lt;code&gt;Context&lt;/code&gt;. Reactive context extensions need to implement &lt;code&gt;ReactiveEvaluationContextExtension&lt;/code&gt; so that they can participate in deferred context extension resolution. Reactive extensions can extract contextual data and pass it on to the actual &lt;code&gt;EvaluationContextExtension&lt;/code&gt; that provides functionality to Spring Data&amp;rsquo;s SpEL evaluation mechanism.&lt;/p&gt;
+&lt;p&gt;Note that Reactive SpEL support is available only for reactive repository query methods. SpEL expressions in other components (for example, a collection name in a MongoDB &lt;code&gt;@Document&lt;/code&gt; or a Cassandra &lt;code&gt;@Table&lt;/code&gt; name) are resolved without considering reactive context extensions as that API has no access to the subscriber &lt;code&gt;Context&lt;/code&gt;.&lt;/p&gt;&lt;h2&gt;&lt;a href="#refinements-to-spel-context-extension-resolution" class="anchor" name="refinements-to-spel-context-extension-resolution"&gt;&lt;/a&gt;Refinements to SpEL Context Extension Resolution&lt;/h2&gt;
+&lt;p&gt;Since its inception, Spring Data has attempted resolution of all registered SpEL context extensions prior to SpEL expression processing if a query contained at least one SpEL expression. Context resolution can be expensive. Also, sometimes, context may be not present. Consider the following query methods:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint java"&gt;@Query(&amp;quot;SELECT * FROM person WHERE tenant = :#{tenantId}&amp;quot;)&#xD;
+List&amp;lt;Person&amp;gt; findAllPeopleForTenant();&#xD;
+&#xD;
+@Query(&amp;quot;SELECT * FROM person WHERE tenant = :#{tenantId} or 1=?#{hasRole(&amp;#39;ROLE_ADMIN&amp;#39;) ? 1 : 0&amp;quot;)&#xD;
+List&amp;lt;Person&amp;gt; findAllPeople();
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Both query methods use SpEL expressions, and the second query method has a reference to Spring Security&amp;rsquo;s SpEL context extension. When calling the first method (&lt;code&gt;findAllPeopleForTenant&lt;/code&gt;) that only considers the &lt;code&gt;tenantId&lt;/code&gt;, Spring Data also loaded Spring Security&amp;rsquo;s extension. If the method was called outside of a security context, the method invocation failed because Spring Security could not resolve a security context. Invocation in a &lt;code&gt;CommandLineRunner&lt;/code&gt; , &lt;code&gt;ApplicationEventLister&lt;/code&gt;, or lifecyle method (such as &lt;code&gt;@PostConstruct&lt;/code&gt;) are typical examples where no security context is given:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint java"&gt;class MyComponent {&#xD;
+&#xD;
+  @Autowired PersonRepository repository;&#xD;
+  &#xD;
+  @PostConstruct&#xD;
+  public void postConstruct() {&#xD;
+    TenantIdHolder.setCurrentTenant(4711);&#xD;
+&#xD;
+    // this method fails with an exception because it attempts to resolve&#xD;
+    // the security context although it&amp;#39;s not required in for the actual query.&#xD;
+    repository.findAllPeopleForTenant(); &#xD;
+  }&#xD;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;With the introduction of Reactive SpEL Context extensions, we refined our SPI to resolve only extensions that are actually needed. &lt;code&gt;org.springframework.data.spel.ExpressionDependencies&lt;/code&gt; performs a static analysis of the SpEL expression and collects symbols (property references and method calls). Obtaining the &lt;code&gt;EvaluationContext&lt;/code&gt; through &lt;code&gt;EvaluationContextProvider&lt;/code&gt; accepts &lt;code&gt;ExpressionDependencies&lt;/code&gt; to inspect which extensions provide these symbols and load only the ones that can satisfy the dependency requirements. This change should be transparent to most applications, as it touches only internal code.&lt;br/&gt;Note that the dependency analysis enables arrangements of running SpEL-enabled queries in, for example, &lt;code&gt;@PostConstruct&lt;/code&gt;, if the query refers only to contextual functionality that can be resolved. Context extensions that are not involved in the query are no longer attempted for resolution, and that change may reflect into your application. That optimization applies to both imperative and reactive code paths and should result in improved performance.&lt;/p&gt;&lt;h2&gt;&lt;a href="#repository-metrics" class="anchor" name="repository-metrics"&gt;&lt;/a&gt;Repository Metrics&lt;/h2&gt;
+&lt;p&gt;Having insight into the application as it runs is crucial to some businesses. The persistence layer (especially) can be, perhaps due to the network or slow query execution on server side, a culprit in performance issues.&lt;br/&gt;Repository metrics now give you a source of truth for runtime performance of your data access layer, by hooking directly into the Spring Data execution infrastructure.&lt;br/&gt;Listeners attached to the repository get notified about each and every invocation done to the interface, providing information about the repository itself, the method invoked, the arguments passed on, and the execution outcome (success, error, and cancelation signals), omitting the actual result.&lt;/p&gt;
+&lt;p&gt;For synchronous repository interfaces, the measurement starts at query method invocation time, which includes the time taken to actually parse a potential annotated query and evaluate extensions providing values through SpEL expressions, as outlined in the preceding section, and ends when the potentially converted result is returned.&lt;/p&gt;
+&lt;p&gt;For reactive repositories, the actual subscription marks the invocation entry point, whereas the complete or cancel signal completes the measurement. &lt;/p&gt;
+&lt;p&gt;At this time, the setup is not the most convenient, as it requires a &lt;code&gt;BeanPostProcessor&lt;/code&gt; to manipulate the repository factory bean by adding the invocation listeners. However, future Spring Boot releases will offer dedicated support for repository metrics included in the actuator endpoints.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint java"&gt;class RepositoryMetricsPostProcessor implements BeanPostProcessor { &#xD;
+   public Object postProcessBeforeInitialization(Object bean, String beanName) {&#xD;
+&#xD;
+     if (bean instanceof RepositoryFactoryBeanSupport) {&#xD;
+         RepositoryFactoryBeanSupport&amp;lt;?, ?, ?&amp;gt; repositoryFactoryBean = (...) bean;      &#xD;
+         repositoryFactoryBean.addRepositoryFactoryCustomizer(repositoryFactory -&amp;gt; {&#xD;
+         	repositoryFactory.addInvocationListener(System.out::println);&#xD;
+         });&#xD;
+     }&#xD;
+   return bean;&#xD;
+   }&#xD;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;So that you can see it in action, we have prepared a little &lt;a href="https://github.com/spring-projects/spring-data-examples/tree/boot-next/mongodb/repository-metrics"&gt;metrics example&lt;/a&gt; for you. That prints invocation durations to the console.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint bash"&gt;PersonRepository.save(Object): 2 ms – SUCCESS&#xD;
+&#xD;
+PersonRepository.save(Object): 2 ms – SUCCESS&#xD;
+&#xD;
+PersonRepository.findAll(): 32 ms – SUCCESS&#xD;
+&#xD;
+PersonRespository.findByName(String): 1 ms - SUCCESS
+&lt;/code&gt;&lt;/pre&gt;&lt;h2&gt;&lt;a href="#graalvm-native-images" class="anchor" name="graalvm-native-images"&gt;&lt;/a&gt;GraalVM native images&lt;/h2&gt;
+&lt;p&gt;When talking about metrics and performance, one might soon think of scale-to-zero scenarios, startup speed, and &lt;a href="https://www.graalvm.org/reference-manual/native-image/"&gt;GraalVM native images&lt;/a&gt;. The Spring Data team has been pushing hard on that end, resulting in an improved developer experience when compiling native images that make use of Spring Data repositories.&lt;br/&gt;The efforts cover simple toggles to disable certain features, such as the code generation for an optimized entity instantiation scenario, &lt;a href="https://github.com/spring-projects-experimental/spring-graalvm-native/blob/0.8.2/spring-graalvm-native-configuration/src/main/java/org/springframework/boot/autoconfigure/data/mongodb/MongoRepositoriesHints.java"&gt;compilation hints&lt;/a&gt;, and a &lt;code&gt;SpringDataComponentProcessor&lt;/code&gt; as part of the &lt;a href="https://github.com/spring-projects-experimental/spring-graalvm-native"&gt;spring-graalvm-native&lt;/a&gt; project.&lt;br/&gt;The component processor inspects Spring Data repositories, the domain types, and method signatures. Based on that information, it adds all the required proxy, resource, and reflection configuration to the native image to make it work.&lt;br/&gt;This also includes any store-specific annotations and custom implementations for both the imperative and reactive interfaces.&lt;br/&gt;If you are curious, give it a &lt;a href="https://github.com/spring-projects-experimental/spring-graalvm-native/blob/0.8.2/spring-graalvm-native-samples"&gt;try&lt;/a&gt;!&lt;/p&gt;
+&lt;p&gt;With that, we finish our first part of this series. Watch this space for updates related to your favorite store and check out the &lt;a href="https://github.com/spring-projects/spring-data-examples"&gt;Spring Data Examples&lt;/a&gt; to shorten the time till it is published.&lt;/p&gt;
+&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
+  </entry>
+  <entry>
+    <title>A Bootiful Podcast: Spring legend Thomas Risberg on JDBC, Spring Cloud Data Flow, Kubernetes and so much more</title>
+    <link rel="alternate" href="https://spring.io/blog/2020/11/05/a-bootiful-podcast-spring-legend-thomas-risberg-on-jdbc-spring-cloud-data-flow-kubernetes-and-so-much-more" />
+    <category term="engineering" label="Engineering" />
+    <author>
+      <name>Josh Long</name>
+    </author>
+    <id>tag:spring.io,2020-11-05:4261</id>
+    <updated>2020-11-05T23:44:26Z</updated>
+    <content type="html">&lt;p&gt;Hi, Spring fans! In this episode &lt;a href="http://twitter.com/starbuxman"&gt;Josh Long (@starbuxman)&lt;/a&gt; talks to Spring &lt;a href="http://twitter.com/trisberg"&gt;legend Thomas Risberg (@trisberg)&lt;/a&gt;.&lt;/p&gt;
+&lt;iframe title="Spring legend Thomas Risberg on JDBC, Spring Cloud Data Flow, Kubernetes and so much more" height="122" width="100%" style="border: none;" scrolling="no" data-name="pb-iframe-player" src="https://www.podbean.com/media/player/bqtfb-f17814?from=pb6admin&amp;download=1&amp;version=1&amp;auto=0&amp;share=1&amp;download=1&amp;rtl=0&amp;fonts=Helvetica&amp;skin=1&amp;pfauth=&amp;btn-skin=107"&gt;&lt;/iframe&gt;
+&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
+  </entry>
+  <entry>
+    <title>Spring Security 5.5.0-M1 Released</title>
+    <link rel="alternate" href="https://spring.io/blog/2020/11/04/spring-security-5-5-0-m1-released" />
+    <category term="releases" label="Releases" />
+    <author>
+      <name>Joe Grandja</name>
+    </author>
+    <id>tag:spring.io,2020-11-03:4252</id>
+    <updated>2020-11-04T12:12:50Z</updated>
+    <content type="html">&lt;div class="paragraph"&gt;
+&lt;p&gt;On behalf of the community, I’m pleased to announce the release of
+Spring Security 5.5.0-M1! You can find the complete details in the &lt;a href="https://github.com/spring-projects/spring-security/releases/tag/5.5.0-M1"&gt;release notes&lt;/a&gt; and the highlights below:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="sect1"&gt;
+&lt;h2 id="oauth-2-0"&gt;&lt;a class="anchor" href="#oauth-2-0"&gt;&lt;/a&gt;OAuth 2.0&lt;/h2&gt;
+&lt;div class="sectionbody"&gt;
+&lt;div class="sect4"&gt;
+&lt;h5 id="gh-5502-oauth2token-interface-for-abstractoauth2token"&gt;&lt;a class="anchor" href="#gh-5502-oauth2token-interface-for-abstractoauth2token"&gt;&lt;/a&gt;&lt;a href="https://github.com/spring-projects/spring-security/issues/5502"&gt;gh-5502&lt;/a&gt; - OAuth2Token interface for AbstractOAuth2Token&lt;/h5&gt;
+
+&lt;/div&gt;
+&lt;div class="sect4"&gt;
+&lt;h5 id="gh-9070-use-lobhandler-in-jdbcoauth2authorizedclientservice"&gt;&lt;a class="anchor" href="#gh-9070-use-lobhandler-in-jdbcoauth2authorizedclientservice"&gt;&lt;/a&gt;&lt;a href="https://github.com/spring-projects/spring-security/pull/9070"&gt;gh-9070&lt;/a&gt; - Use LobHandler in JdbcOAuth2AuthorizedClientService&lt;/h5&gt;
+
+&lt;/div&gt;
+&lt;div class="sect4"&gt;
+&lt;h5 id="gh-8765-provide-a-r2dbc-implementation-of-reactiveouath2authorizedclientservice"&gt;&lt;a class="anchor" href="#gh-8765-provide-a-r2dbc-implementation-of-reactiveouath2authorizedclientservice"&gt;&lt;/a&gt;&lt;a href="https://github.com/spring-projects/spring-security/pull/8765"&gt;gh-8765&lt;/a&gt; - Provide a R2dbc implementation of ReactiveOuath2AuthorizedClientService&lt;/h5&gt;
+
+&lt;/div&gt;
+&lt;div class="sect4"&gt;
+&lt;h5 id="gh-7160-jwtdecoders-and-reactivejwtdecoders-should-determine-algorithm-from-jwk-set-endpoint"&gt;&lt;a class="anchor" href="#gh-7160-jwtdecoders-and-reactivejwtdecoders-should-determine-algorithm-from-jwk-set-endpoint"&gt;&lt;/a&gt;&lt;a href="https://github.com/spring-projects/spring-security/issues/7160"&gt;gh-7160&lt;/a&gt; - JwtDecoders and ReactiveJwtDecoders should determine algorithm from JWK Set Endpoint&lt;/h5&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="sect1"&gt;
+&lt;h2 id="saml"&gt;&lt;a class="anchor" href="#saml"&gt;&lt;/a&gt;SAML&lt;/h2&gt;
+&lt;div class="sectionbody"&gt;
+&lt;div class="sect4"&gt;
+&lt;h5 id="gh-9177-saml-2-0-asserting-party-metadata-resolution-should-read-signingmethod-elements"&gt;&lt;a class="anchor" href="#gh-9177-saml-2-0-asserting-party-metadata-resolution-should-read-signingmethod-elements"&gt;&lt;/a&gt;&lt;a href="https://github.com/spring-projects/spring-security/issues/9177"&gt;gh-9177&lt;/a&gt; - SAML 2.0 Asserting Party Metadata resolution should read SigningMethod elements&lt;/h5&gt;
+
+&lt;/div&gt;
+&lt;div class="sect4"&gt;
+&lt;h5 id="gh-9131-opensamlauthenticationprovider-should-decrypt-attributes"&gt;&lt;a class="anchor" href="#gh-9131-opensamlauthenticationprovider-should-decrypt-attributes"&gt;&lt;/a&gt;&lt;a href="https://github.com/spring-projects/spring-security/issues/9131"&gt;gh-9131&lt;/a&gt; - OpenSamlAuthenticationProvider should decrypt attributes&lt;/h5&gt;
+
+&lt;/div&gt;
+&lt;div class="sect4"&gt;
+&lt;h5 id="gh-9028-file-based-configuration-for-asserting-party-metadata"&gt;&lt;a class="anchor" href="#gh-9028-file-based-configuration-for-asserting-party-metadata"&gt;&lt;/a&gt;&lt;a href="https://github.com/spring-projects/spring-security/issues/9028"&gt;gh-9028&lt;/a&gt; - File-based Configuration for Asserting Party Metadata&lt;/h5&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="sect1"&gt;
+&lt;h2 id="testing"&gt;&lt;a class="anchor" href="#testing"&gt;&lt;/a&gt;Testing&lt;/h2&gt;
+&lt;div class="sectionbody"&gt;
+&lt;div class="sect4"&gt;
+&lt;h5 id="gh-9179-withsecuritycontexttestexecutionlistener-should-support-nested-classes"&gt;&lt;a class="anchor" href="#gh-9179-withsecuritycontexttestexecutionlistener-should-support-nested-classes"&gt;&lt;/a&gt;&lt;a href="https://github.com/spring-projects/spring-security/issues/9179"&gt;gh-9179&lt;/a&gt; - WithSecurityContextTestExecutionListener Should Support Nested Classes&lt;/h5&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="sect1"&gt;
+&lt;h2 id="docs"&gt;&lt;a class="anchor" href="#docs"&gt;&lt;/a&gt;Docs&lt;/h2&gt;
+&lt;div class="sectionbody"&gt;
+&lt;div class="sect4"&gt;
+&lt;h5 id="gh-9178-add-webflux-documentation-for-multiple-filter-chains"&gt;&lt;a class="anchor" href="#gh-9178-add-webflux-documentation-for-multiple-filter-chains"&gt;&lt;/a&gt;&lt;a href="https://github.com/spring-projects/spring-security/issues/9178"&gt;gh-9178&lt;/a&gt; - Add WebFlux Documentation for Multiple Filter Chains&lt;/h5&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;&lt;a href="http://projects.spring.io/spring-security/"&gt;Project Site&lt;/a&gt; |
+&lt;a href="https://docs.spring.io/spring-security/site/docs/5.5.0-M1/reference/html5/"&gt;Reference&lt;/a&gt;
+| &lt;a href="http://stackoverflow.com/questions/tagged/spring-security"&gt;Help&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
+  </entry>
+  <entry>
+    <title>This Week in Spring - November 3, 2020</title>
+    <link rel="alternate" href="https://spring.io/blog/2020/11/03/this-week-in-spring-november-3-2020" />
+    <category term="engineering" label="Engineering" />
+    <author>
+      <name>Josh Long</name>
+    </author>
+    <id>tag:spring.io,2020-11-03:4253</id>
+    <updated>2020-11-03T23:05:51Z</updated>
+    <content type="html">&lt;p&gt;Hi, Spring fans! I hope you&amp;rsquo;re all doing well, staying safe, healthy and happy. Today&amp;rsquo;s election day here in the US, so I am super happy to have the chance to dive into this week&amp;rsquo;s roundup as a bit of a distraction. We&amp;rsquo;ve got a ton to get through today, so let&amp;rsquo;s! &lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;I really enjoyed last week&amp;rsquo;s &lt;em&gt;A Bootiful Podcast&lt;/em&gt; episode with &lt;a href="https://spring.io/blog/2020/10/29/a-bootiful-podcast-spring-test-framework-lead-and-junit-contributor-sam-brannen"&gt;Spring Test Framework lead and JUnit contributor Sam Brannen&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/11/02/spring-integration-5-4-goes-ga-some-other-integration-releases"&gt;Spring Integration 5.4 goes GA; some other Integration releases&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/10/30/spring-boot-2-4-0-rc1-available-now"&gt;Spring Boot 2.4.0.RC1 is now available&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/10/29/notice-of-permissions-changes-to-repo-spring-io-fall-and-winter-2020"&gt;Notice of Permissions Changes to repo.spring.io, Fall and Winter, 2020&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://twitter.com/morl99/status/1321194714692001792?s=21"&gt;Congrats, Carsten Hoffmann, on your first live-coding presentation, and congrats on starting your work from my second favorite place on the internet: start.spring.io!&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://twitter.com/olehdokuka/status/1321385366746767360?s=21"&gt;Oleh Dokuka on Twitter: &amp;ldquo;Woo! &#x1f37e; &#x1f4e2; New RSocket 1.1.0 is GA. It includes, among other things, 10x better performance than before, reworked loadbalance API and implementation, a new &lt;code&gt;RSocketClient&lt;/code&gt; for a better experience, fixes for memory leaks and more&amp;rdquo;&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/10/29/spring-boot-2-1-18-available-now"&gt;Spring Boot 2.1.18 available now&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/10/28/spring-data-2020-0-0-goes-ga"&gt;Spring Data 2020.0.0 goes GA&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/10/28/spring-data-neumann-sr5-moore-sr11-and-lovelace-sr21-available-now"&gt;Spring Data Neumann SR5, Moore SR11, and Lovelace SR21 available now&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://twitter.com/CapgeminiNL/status/1321409280881401857?s=20"&gt;capgeminiNL on Twitter: &amp;quot;Ready for a night full of tech inspiration? Join us on the .BLD() Tech Talks XXL - Java Night on 17 November! We’ll dive into the future of microservice based architectures together with @wietsesmid @starbuxman. Get your free ticket!&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://twitter.com/java/status/1321586704042455040"&gt; Java 16 Update: New JEP Proposed to Target: 394: Pattern Matching for instanceof. Targeted JEP Additions: 380: Unix-Domain Socket Channels and 395: Records &lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://springdoc.org/"&gt;springdoc-openapi | Library for OpenAPI 3 with spring-boot&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
+  </entry>
   <entry>
     <title>Spring Integration 5.4 goes GA; some other Integration releases</title>
     <link rel="alternate" href="https://spring.io/blog/2020/11/02/spring-integration-5-4-goes-ga-some-other-integration-releases" />
@@ -835,125 +1087,6 @@ Finally, we saw how we can easily switch &lt;code&gt;MessageGroupStore&lt;/code&
     <content type="html">&lt;p&gt;Hi, Spring fans! In this installment &lt;a href="http://twitter.com/starbuxman"&gt;Josh Long (@starbuxman)&lt;/a&gt; talks to &lt;a href="http://twitter.com/UseOptic"&gt;Optic (@UseOptic)&lt;/a&gt; CEO &lt;a href="http://twitter.com/UseOptic"&gt;Aidan Cunniffe (@aidandcunniffe)&lt;/a&gt; about OpenAPI, contract testing, and so much more &lt;/p&gt;
 &lt;p&gt;Get the Spring &lt;/p&gt;
 &lt;p&gt;&lt;iframe title="Optic CEO Aidan Cunniffe on OpenAPI, contract testing, and so much more " height="122" width="100%" style="border: none;" scrolling="no" data-name="pb-iframe-player" src="https://www.podbean.com/media/player/q7sjn-f02091?from=pb6admin&amp;download=1&amp;version=1&amp;auto=0&amp;share=1&amp;download=1&amp;rtl=0&amp;fonts=Helvetica&amp;skin=1&amp;pfauth=&amp;btn-skin=107"&gt;&lt;/iframe&gt;&lt;/p&gt;
-&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
-  </entry>
-  <entry>
-    <title>This Week in Spring - October 20, 2020</title>
-    <link rel="alternate" href="https://spring.io/blog/2020/10/20/this-week-in-spring-october-20-2020" />
-    <category term="engineering" label="Engineering" />
-    <author>
-      <name>Josh Long</name>
-    </author>
-    <id>tag:spring.io,2020-10-20:4235</id>
-    <updated>2020-10-20T19:21:47Z</updated>
-    <content type="html">&lt;p&gt;Hi Spring fans! Welcome to another installment of &lt;em&gt;This Week in Spring&lt;/em&gt;! How&amp;rsquo;re things? It&amp;rsquo;s been unseasonably warm here in San Francisco so I am writing this from my balcony with a warm cup of coffee and hope in my heart. It is still very hard to believe we&amp;rsquo;re near Halloween, though! Crazy how time flies. There&amp;rsquo;s lots of good stuff to look at this week so let&amp;rsquo;s get to it! Hopefully you can enjoy this week&amp;rsquo;s news from some warm, safe and healthy spot in your life, too.&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/10/15/a-bootiful-podcast-datastax-s-patrick-mcfadin-on-datastax-astra-cassandra-cassandra-data-modeling-patterns-and-more"&gt;A Bootiful Podcast: DataStax&amp;rsquo;s Patrick McFadin on DataStax Astra, Cassandra, Cassandra data modeling patterns, and more&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://twitter.com/shidi/status/1311192880870875136?s=12"&gt;A tutorial on Batch and REST&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://blogs.vmware.com/opensource/2020/10/20/history-of-open-source-and-free-software-dirk-swap/"&gt;History of Open Source and Free Software: Dirk &amp;amp; Swap: Conversations on Open Source&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://github.com/spring-projects-experimental/spring-graphql"&gt;Incubator support for Spring and GraphQL&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/10/15/premiering-bootiful-kotlin"&gt;Premiering: Bootiful Kotlin&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://inside.java/2020/10/14/jdk16-proposed-schedule/"&gt;Proposed schedule for JDK 16&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/10/15/spring-authorization-server-0-0-2-available-now"&gt;Spring Authorization Server 0.0.2 available now&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/10/15/spring-boot-2-4-0-m4-available-now"&gt;Spring Boot 2.4.0-M4 available now&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/10/14/spring-data-2020-0-rc2-out-now"&gt;Spring Data 2020.0 RC2 out now&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/10/14/spring-integration-5-4-release-candidate-1-available"&gt;Spring Integration 5.4 Release Candidate 1 Available&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://www.mscharhag.com/spring/security-authorization-bean-methods"&gt;Spring Security: Delegating authorization checks to bean methods&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://tanzu.vmware.com/developer/tv/code/0005/"&gt;The Road to (Continuous) Delivery with Josh Long | Tanzu.TV | VMware Tanzu Developer Center&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://blogs.vmware.com/opensource/2020/10/15/vmware-experts-first-open-source-projects/"&gt;VMware Experts Share Their First Open Source Project&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://blogs.vmware.com/opensource/2020/10/15/vmwares-open-source-shop-of-curiosities-at-all-things-open/"&gt;VMware’s Open Source Shop of Curiosities at All Things Open&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://blogs.vmware.com/opensource/2020/10/13/why-open-governance-is-important-for-open-source/"&gt;Why Open Governance Is Important for Open Source | Dirk Hohndel &amp;amp; Swapnil Bhartiya&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://blogs.vmware.com/opensource/2020/10/20/why-use-singleton-for-globalization/"&gt;Why Use Singleton for Globalization? Understanding the Key Benefits&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://twitter.com/JavaAtMicrosoft/status/1318622146336190465"&gt;https://twitter.com/JavaAtMicrosoft/status/1318622146336190465 @JavaAtMicrosoft Using #IntelliJ? Don&amp;rsquo;t miss @trisha_gee covering Modern #Java productive features enabled by IntelliJ, and combine that with @rorypreddy&amp;rsquo;s talk on Supercharging Spring Boot ap&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://tanzu.vmware.com/developer/guides/"&gt;Have you checked out the VMware Developer Portal? There are tips on Kubernetes, Spring, CI/CD, remote work, agile, and so much more&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://mail.openjdk.java.net/pipermail/valhalla-spec-experts/2020-October/001415.html"&gt;the latest terminology update: primitive objects&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
-  </entry>
-  <entry>
-    <title>Spring Boot 2.4.0-M4 available now</title>
-    <link rel="alternate" href="https://spring.io/blog/2020/10/15/spring-boot-2-4-0-m4-available-now" />
-    <category term="releases" label="Releases" />
-    <author>
-      <name>Scott Frederick</name>
-    </author>
-    <id>tag:spring.io,2020-10-15:4234</id>
-    <updated>2020-10-15T23:22:00Z</updated>
-    <content type="html">&lt;p&gt;On behalf of the team and everyone that contributed, I am pleased to announce that the fourth milestone of Spring Boot 2.4 has been released and is available from &lt;a href="https://repo.spring.io/milestone/"&gt;our milestone repository&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;This release closes &lt;a href="https://github.com/spring-projects/spring-boot/releases/tag/v2.4.0-M4"&gt;145 issues and pull requests&lt;/a&gt;. Thanks to all those who have contributed with issue reports and pull requests.&lt;/p&gt;
-&lt;p&gt;Highlights of this milestone include:&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;Failure Analyzer improvements&lt;/li&gt;
-  &lt;li&gt;Ability to publish Docker images generated by the Maven and Gradle plugins&lt;/li&gt;
-  &lt;li&gt;Redis cache metrics exposed via Micrometer&lt;/li&gt;
-  &lt;li&gt;Numerous dependency upgrades&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;For a complete list of changes and upgrade instructions, please see the &lt;a href="https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.4.0-M4-Release-Notes"&gt;Spring Boot 2.4 Release Notes&lt;/a&gt; on the wiki and the &lt;a href="http://docs.spring.io/spring-boot/docs/2.4.0-M4/reference/html/"&gt;updated reference documentation&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;If you want to get started with 2.4 and try out the new features, you can bootstrap a new project on &lt;a href="https://start.spring.io"&gt;https://start.spring.io&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;a href="http://projects.spring.io/spring-boot/"&gt;Project Page&lt;/a&gt; | &lt;a href="https://github.com/spring-projects/spring-boot"&gt;GitHub&lt;/a&gt; | &lt;a href="https://github.com/spring-projects/spring-boot/issues"&gt;Issues&lt;/a&gt; | &lt;a href="http://docs.spring.io/spring-boot/docs/2.4.0-M4/reference/html"&gt;Documentation&lt;/a&gt; | &lt;a href="http://stackoverflow.com/questions/tagged/spring-boot"&gt;Stack Overflow&lt;/a&gt; | &lt;a href="https://gitter.im/spring-projects/spring-boot"&gt;Gitter&lt;/a&gt;&lt;/p&gt;
-&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
-  </entry>
-  <entry>
-    <title>A Bootiful Podcast: DataStax's Patrick McFadin on DataStax Astra, Cassandra, Cassandra data modeling patterns, and more</title>
-    <link rel="alternate" href="https://spring.io/blog/2020/10/15/a-bootiful-podcast-datastax-s-patrick-mcfadin-on-datastax-astra-cassandra-cassandra-data-modeling-patterns-and-more" />
-    <category term="engineering" label="Engineering" />
-    <author>
-      <name>Josh Long</name>
-    </author>
-    <id>tag:spring.io,2020-10-15:4233</id>
-    <updated>2020-10-15T20:21:55Z</updated>
-    <content type="html">&lt;iframe title="DataStax's Patrick McFadin on DataStax Astra, Cassandra, Cassandra data modeling patterns, and more" height="122" width="100%" style="border: none;" scrolling="no" data-name="pb-iframe-player" src="https://www.podbean.com/media/player/5wk64-ef7548?from=pb6admin&amp;download=1&amp;version=1&amp;auto=0&amp;share=1&amp;download=1&amp;rtl=0&amp;fonts=Helvetica&amp;skin=1&amp;pfauth=&amp;btn-skin=107"&gt;&lt;/iframe&gt;
-&lt;p&gt;Hi, Spring fans! In this episode &lt;a href="http://twitter.com/starbuxman"&gt;Josh Long (@starbuxman)&lt;/a&gt; talks about all the wonderful shows he&amp;rsquo;s been at, the epic new support for Kubernetes-ready native images in Spring Boot 2.3 and Spring Boot 2.4, and then he talks to DataStax&amp;rsquo;s own &lt;a href="http://twitter.com/PatrickMcFadin"&gt;Patrick McFadin (@PatrickMcFadin)&lt;/a&gt;, a legend in the JVM and Cassandra communities, and an all around amiable gent. &lt;/p&gt;
-&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
-  </entry>
-  <entry>
-    <title>Spring Authorization Server 0.0.2 available now</title>
-    <link rel="alternate" href="https://spring.io/blog/2020/10/15/spring-authorization-server-0-0-2-available-now" />
-    <category term="releases" label="Releases" />
-    <author>
-      <name>Joe Grandja</name>
-    </author>
-    <id>tag:spring.io,2020-10-15:4232</id>
-    <updated>2020-10-15T09:57:35Z</updated>
-    <content type="html">&lt;div class="paragraph"&gt;
-&lt;p&gt;On behalf of the team and everyone who has contributed, it is my pleasure to announce the general availability of Spring Authorization Server 0.0.2.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;You can download it from &lt;a href="https://repo.spring.io/release/"&gt;repo.spring.io&lt;/a&gt; and Maven Central by using the module coordinates:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="groovy"&gt;compile 'org.springframework.security.experimental:spring-security-oauth2-authorization-server:0.0.2'&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;For additional details on this new project, see the &lt;a href="https://spring.io/blog/2020/04/15/announcing-the-spring-authorization-server"&gt;initial announcement&lt;/a&gt; and &lt;a href="https://github.com/spring-projects-experimental/spring-authorization-server"&gt;project page&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The main features delivered in this release are:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="ulist"&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;Proof Key for Code Exchange by OAuth Public Clients (PKCE)&amp;#8201;&amp;#8212;&amp;#8201;&lt;a href="https://tools.ietf.org/html/rfc7636"&gt;RFC 7636&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;User Consent page for OAuth 2.0 Authorization Code Grant&amp;#8201;&amp;#8212;&amp;#8201;&lt;a href="https://tools.ietf.org/html/rfc6749#section-4.1"&gt;RFC 6749&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;See the &lt;a href="https://github.com/spring-projects-experimental/spring-authorization-server/releases/tag/0.0.2"&gt;release notes&lt;/a&gt; for complete details.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;To get started using Spring Authorization Server, see the &lt;a href="https://github.com/spring-projects-experimental/spring-authorization-server/tree/master/samples/boot/oauth2-integration"&gt;sample&lt;/a&gt; to become familiar with setup and configuration.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;We would love to gather your feedback as we strive to improve and build upon this release.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;&lt;a href="https://github.com/spring-projects-experimental/spring-authorization-server"&gt;Project Page&lt;/a&gt; | &lt;a href="https://github.com/spring-projects-experimental/spring-authorization-server/issues"&gt;GitHub Issues&lt;/a&gt; |  &lt;a href="https://app.zenhub.com/workspaces/authorization-server-5e8f3182b5e8f5841bfc4902/board?repos=248032165"&gt;ZenHub Board&lt;/a&gt;&lt;/p&gt;
-&lt;/div&gt;
 &lt;!-- rendered by Sagan Renderer Service --&gt;</content>
   </entry>
 </feed>
