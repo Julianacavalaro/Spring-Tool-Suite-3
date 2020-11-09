@@ -11,8 +11,9 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sun.istack.NotNull;
 
+//criando tabela
 @Entity
-@Table(name="tb_manutencao")
+@Table(name="tb_manutencao_crud")
 public class ManutencaoTable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +24,10 @@ public class ManutencaoTable {
 	
 	@Column
 	private String categoria;
-	
+	@Column
+	@JsonFormat(pattern="yyyy-mm-dd")
+	private Date data;
+
 	
 	public String getCategoria() {
 		return categoria;
@@ -36,8 +40,15 @@ public class ManutencaoTable {
 	private boolean pago;
 	
 	// getters e setters
+	
 	public Long getId() {
 		return Id;
+	}
+	public Date getData() {
+		return data;
+	}
+	public void setData(Date data) {
+		this.data = data;
 	}
 	public void setId(Long id) {
 		Id = id;

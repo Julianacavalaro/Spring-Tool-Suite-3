@@ -3,13 +3,39 @@
 <head>
 <meta charset="ISO-8859-1">
 <title>Insert title here</title>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="controller.js"></script>
 </head>
 <body>
 
 Esta é a Lista <hr>
 <a href="index.html"> Home </a> |
 <a href="lista.html"> Lista </a> |
-<a href="inserir.html"> Inserir </a>
+<a href="inserir.html"> Inserir </a> |
+<a href="atualizar.html"> Atualizar </a>
 
+	<br>
+	<div ng-app="myApp" ng-controller="myCtrl">
+	<table border="1">
+	<tr>
+		<th>id</th>
+		<th>nome</th>
+		<th>data</th>
+		<th>categoria</th>
+		<th>pago</th>
+		<th>ações</th>
+	</tr>
+	<tr ng-repeat="manutencoes in manutencoes">
+		<td>{{manutencoes.id}}</td>
+		<td>{{manutencoes.nome}}</td>
+		<td>{{manutencoes.data}}</td>
+		<td>{{manutencoes.categoria}}</td>
+		<td>{{manutencoes.pago}}</td>
+		<td>editar | excluir </td>
+	</tr>
+	
+	</table>
+	</div>
 </body>
 </html>

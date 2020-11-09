@@ -2,6 +2,7 @@ package com.example.demo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +28,19 @@ public class Controller implements WebMvcConfigurer {
 	
 	@Autowired
 	private ManutencaoRepository repository;
+	
+	//deste jeito nao retornar erro
+	//@GetMapping("/manutencoes/id/{id}")
+	//public Optional<ManutencaoTable> buscarUm(@PathVariable Long id) {
+	//	return repository.findById(id);
+	//}
+		
+		@GetMapping("/manutencoes/id/{id}")
+		public ResponseEntity<ManutencaoTable> getById(@PathVariable long id){
+			return repository.findById(id).map(resp -> ResponseEntity.ok(resp))
+					.orElse(ResponseEntity.notFound().build());
+		}
+
 
 	//localhost:8080/manutencoes
 	@GetMapping("/manutencoes")
