@@ -5,7 +5,551 @@
   <link rel="self" href="https://spring.io/blog.atom" />
   <id>http://spring.io/blog.atom</id>
   <icon>https://spring.io/favicon.ico</icon>
-  <updated>2020-11-06T09:31:06Z</updated>
+  <updated>2020-11-10T15:37:34Z</updated>
+  <entry>
+    <title>New in Spring 5.3: Improved Cron Expressions</title>
+    <link rel="alternate" href="https://spring.io/blog/2020/11/10/new-in-spring-5-3-improved-cron-expressions" />
+    <category term="engineering" label="Engineering" />
+    <author>
+      <name>Arjen Poutsma</name>
+    </author>
+    <id>tag:spring.io,2020-11-10:4265</id>
+    <updated>2020-11-10T15:37:34Z</updated>
+    <content type="html">&lt;div class="paragraph"&gt;
+&lt;p&gt;If you regularly listen to &lt;a href="https://bootifulpodcast.fm"&gt;A Bootiful Podcast&lt;/a&gt;, you might have heard about the improvements we made to Spring Framework&amp;#8217;s cron support.
+Cron expressions are mostly used in Spring applications through the &lt;a href="https://docs.spring.io/spring-framework/docs/current/reference/html/integration.html#scheduling-annotation-support-scheduled"&gt;&lt;code&gt;@Scheduled&lt;/code&gt; annotation&lt;/a&gt;.
+In Spring 5.3, we introduced the &lt;a href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/support/CronExpression.html"&gt;&lt;code&gt;CronExpression&lt;/code&gt;&lt;/a&gt; class, which represents&amp;#8201;&amp;#8212;&amp;#8201;you guessed it&amp;#8201;&amp;#8212;&amp;#8201;a &lt;a href="https://en.wikipedia.org/wiki/Cron#CRON_expression"&gt;cron expression&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;&lt;code&gt;CronExpression&lt;/code&gt; replaces &lt;code&gt;CronSequenceGenerator&lt;/code&gt;, which is based on &lt;code&gt;java.util.Calendar&lt;/code&gt; and which has several known issues that none of the Spring team members felt comfortable solving.
+Introducing a new type allowed us to use the superior &lt;code&gt;java.time&lt;/code&gt; APIs, solve the outstanding issues, and (hopefully) introduce new features as well.
+While Spring generally prefers to maintain backward compatible, sometimes we do believe that starting from scratch is the best option.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="sect1"&gt;
+&lt;h2 id="usage"&gt;&lt;a class="anchor" href="#usage"&gt;&lt;/a&gt;Usage&lt;/h2&gt;
+&lt;div class="sectionbody"&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;You typically create cron triggers with the &lt;code&gt;@Scheduled&lt;/code&gt; annotation, which uses &lt;code&gt;CronExpression&lt;/code&gt; internally, as of Spring Framework 5.3.
+This means that you can already start using the &lt;a href="#new-features"&gt;New Features&lt;/a&gt; if you are on that version.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;If you want to play around with &lt;code&gt;CronExpression&lt;/code&gt; yourself, you can create one through the static parse method:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="listingblock"&gt;
+&lt;div class="content"&gt;
+&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;var expression = CronExpression.parse("10 * * * * *");
+var result = expression.next(LocalDateTime.now());
+System.out.println(result);&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;In this sample, &lt;code&gt;expression&lt;/code&gt; represents a cron sequence that triggers 10 seconds past every minute.
+The &lt;code&gt;parse&lt;/code&gt; method takes the well-known string with six space-separated time and date fields:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="literalblock"&gt;
+&lt;div class="content"&gt;
+&lt;pre&gt; ?????????????? second (0-59)
+ ? ?????????????? minute (0 - 59)
+ ? ? ?????????????? hour (0 - 23)
+ ? ? ? ?????????????? day of the month (1 - 31)
+ ? ? ? ? ?????????????? month (1 - 12) (or JAN-DEC)
+ ? ? ? ? ? ?????????????? day of the week (0 - 7)
+ ? ? ? ? ? ?          (or MON-SUN -- 0 or 7 is Sunday)
+ ? ? ? ? ? ?
+ * * * * * *&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;Some rules apply:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="ulist"&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;A field may be an asterisk (&lt;code&gt;*&lt;/code&gt;), which always stands for &amp;#8220;first-last&amp;#8221;.
+For the day-of-the-month or day-of-the-week fields, a question mark (&lt;code&gt;?&lt;/code&gt;) may be used instead of an asterisk.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Two numbers separated with a hyphen (&lt;code&gt;-&lt;/code&gt;) express a range of numbers.
+The specified range is inclusive.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Following a range (or &lt;code&gt;*&lt;/code&gt;) with &lt;code&gt;/&lt;/code&gt; specifies the interval of the number&amp;#8217;s value through the range.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;English names can also be used for the day-of-month and day-of-week fields.
+Use the first three letters of the particular day or month (case does not matter).&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;Here are some examples:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class="tableblock frame-all grid-all stretch"&gt;
+&lt;colgroup&gt;
+&lt;col style="width: 50%;"&gt;
+&lt;col style="width: 50%;"&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class="tableblock halign-left valign-top"&gt;Cron Expression&lt;/th&gt;
+&lt;th class="tableblock halign-left valign-top"&gt;Meaning&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;0 0 * * * *&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;top of every hour of every day&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;*/10 * * * * *&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;every ten seconds&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;0 0 8-10 * * *&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;8, 9 and 10 o&amp;#8217;clock of every day&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;0 0 6,19 * * *&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;6:00 AM and 7:00 PM every day&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;0 0/30 8-10 * * *&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;8:00, 8:30, 9:00, 9:30, 10:00 and 10:30 every day&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;0 0 9-17 * * MON-FRI&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;on the hour nine-to-five weekdays&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;0 0 0 25 12 ?&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;every Christmas Day at midnight&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;The &lt;code&gt;next&lt;/code&gt; method returns the next occurrence of the trigger or &lt;code&gt;null&lt;/code&gt; if there is none.
+It takes a &lt;code&gt;java.time.temporal.Temporal&lt;/code&gt; as a parameter, which means it accepts not only &lt;code&gt;LocalDateTime&lt;/code&gt; but also &lt;code&gt;ZonedDateTime&lt;/code&gt; if time-zones are relevant.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="sect1"&gt;
+&lt;h2 id="new-features"&gt;&lt;a class="anchor" href="#new-features"&gt;&lt;/a&gt;New Features&lt;/h2&gt;
+&lt;div class="sectionbody"&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;Using the &lt;code&gt;java.time&lt;/code&gt; APIs let us introduce several new features that put Spring&amp;#8217;s support for cron expressions on an equal footing with other schedulers.
+You can start using these features in &lt;code&gt;@Scheduled&lt;/code&gt; as of Spring Framework 5.3.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="sect2"&gt;
+&lt;h3 id="macros"&gt;&lt;a class="anchor" href="#macros"&gt;&lt;/a&gt;Macros&lt;/h3&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;Expressions such as &lt;code&gt;0 0 * * * *&lt;/code&gt; are hard for humans to parse and are, therefore, hard to fix in case of bugs.
+To improve readability, Spring now supports the following macros, which represent commonly used sequences.
+You can use these macros instead of the six-digit value, thus: &lt;code&gt;@Scheduled(cron = "@hourly")&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class="tableblock frame-all grid-all stretch"&gt;
+&lt;colgroup&gt;
+&lt;col style="width: 50%;"&gt;
+&lt;col style="width: 50%;"&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class="tableblock halign-left valign-top"&gt;Macro&lt;/th&gt;
+&lt;th class="tableblock halign-left valign-top"&gt;Meaning&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;@yearly&lt;/code&gt; (or &lt;code&gt;@annually&lt;/code&gt;)&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;once a year (&lt;code&gt;0 0 0 1 1 *&lt;/code&gt;)&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;@monthly&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;once a month (&lt;code&gt;0 0 0 1 * *&lt;/code&gt;)&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;@weekly&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;once a week (&lt;code&gt;0 0 0 * * 0&lt;/code&gt;)&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;@daily&lt;/code&gt; (or &lt;code&gt;@midnight&lt;/code&gt;)&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;once a day (&lt;code&gt;0 0 0 * * *&lt;/code&gt;), or&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;@hourly&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;once an hour, (&lt;code&gt;0 0 * * * *&lt;/code&gt;)&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class="sect2"&gt;
+&lt;h3 id="last-days"&gt;&lt;a class="anchor" href="#last-days"&gt;&lt;/a&gt;Last Days&lt;/h3&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;The day-of-month and day-of-week fields can contain a &lt;code&gt;L&lt;/code&gt; character, which has a different meaning in each field.
+In the day-of-month field, &lt;code&gt;L&lt;/code&gt; stands for &lt;em&gt;the last day of the month&lt;/em&gt;.
+If followed by a negative offset (that is, &lt;code&gt;L-n&lt;/code&gt;), it means &lt;em&gt;&lt;code&gt;n&lt;/code&gt;th-to-last day of the month&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;In the day-of-week field, &lt;code&gt;L&lt;/code&gt; stands for &lt;em&gt;the last day of the week&lt;/em&gt;.
+If prefixed by a number or three-letter name (&lt;code&gt;dL&lt;/code&gt; or &lt;code&gt;DDDL&lt;/code&gt;), it means &lt;em&gt;the last day of week (&lt;code&gt;d&lt;/code&gt; or &lt;code&gt;DDD&lt;/code&gt;) in the month&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;Here are some examples:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class="tableblock frame-all grid-all stretch"&gt;
+&lt;colgroup&gt;
+&lt;col style="width: 50%;"&gt;
+&lt;col style="width: 50%;"&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class="tableblock halign-left valign-top"&gt;Cron Expression&lt;/th&gt;
+&lt;th class="tableblock halign-left valign-top"&gt;Meaning&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;0 0 0 L * *&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;last day of the month at midnight&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;0 0 0 L-3 * *&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;third-to-last day of the month at midnight&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;0 0 0 * * 5L&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;last Friday of the month at midnight&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;0 0 0 * * THUL&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;last Thursday of the month at midnight&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class="sect2"&gt;
+&lt;h3 id="weekdays"&gt;&lt;a class="anchor" href="#weekdays"&gt;&lt;/a&gt;Weekdays&lt;/h3&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;The day-of-month field can be &lt;code&gt;nW&lt;/code&gt;, which stands for &lt;em&gt;the nearest weekday to day of the month &lt;code&gt;n&lt;/code&gt;&lt;/em&gt;.
+If &lt;code&gt;n&lt;/code&gt; falls on Saturday, this yields the Friday before it.
+If &lt;code&gt;n&lt;/code&gt; falls on Sunday, this yields the Monday after, which also happens if &lt;code&gt;n&lt;/code&gt; is &lt;code&gt;1&lt;/code&gt; and falls on a Saturday (that is: &lt;code&gt;1W&lt;/code&gt; stands for &lt;em&gt;the first weekday of the month&lt;/em&gt;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;If the day-of-month field is &lt;code&gt;LW&lt;/code&gt;, it means &lt;em&gt;the last weekday of the month&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;Here are some examples:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class="tableblock frame-all grid-all stretch"&gt;
+&lt;colgroup&gt;
+&lt;col style="width: 50%;"&gt;
+&lt;col style="width: 50%;"&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class="tableblock halign-left valign-top"&gt;Cron Expression&lt;/th&gt;
+&lt;th class="tableblock halign-left valign-top"&gt;Meaning&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;0 0 0 1W * *&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;first weekday of the month at midnight&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;0 0 0 LW * *&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;last weekday of the month at midnight&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class="sect2"&gt;
+&lt;h3 id="second-friday-of-the-month"&gt;&lt;a class="anchor" href="#second-friday-of-the-month"&gt;&lt;/a&gt;Second Friday of the Month&lt;/h3&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;The day-of-week field can be &lt;code&gt;d#n&lt;/code&gt; (or &lt;code&gt;DDD#n&lt;/code&gt;), which stands for &lt;em&gt;the &lt;code&gt;n&lt;/code&gt;th day of week &lt;code&gt;d&lt;/code&gt; (or &lt;code&gt;DDD&lt;/code&gt;) in the month&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;Here are some examples:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class="tableblock frame-all grid-all stretch"&gt;
+&lt;colgroup&gt;
+&lt;col style="width: 50%;"&gt;
+&lt;col style="width: 50%;"&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class="tableblock halign-left valign-top"&gt;Cron Expression&lt;/th&gt;
+&lt;th class="tableblock halign-left valign-top"&gt;Meaning&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;0 0 0 ? * 5#2&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;the second Friday in the month at midnight&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;&lt;code&gt;0 0 0 ? * MON#1&lt;/code&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class="tableblock halign-left valign-top"&gt;&lt;p class="tableblock"&gt;the first Monday in the month at midnight&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;Improved cron expression support is only one of the &lt;a href="https://github.com/spring-projects/spring-framework/wiki/What's-New-in-Spring-Framework-5.x#whats-new-in-version-53"&gt;many features&lt;/a&gt; that Spring Framework 5.3 offers and will be part of the forthcoming &lt;a href="https://github.com/spring-projects/spring-boot/milestone/178"&gt;Spring Boot 2.4&lt;/a&gt; release.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
+  </entry>
+  <entry>
+    <title>Spring Authorization Server 0.0.3 available now</title>
+    <link rel="alternate" href="https://spring.io/blog/2020/11/10/spring-authorization-server-0-0-3-available-now" />
+    <category term="releases" label="Releases" />
+    <author>
+      <name>Joe Grandja</name>
+    </author>
+    <id>tag:spring.io,2020-11-09:4263</id>
+    <updated>2020-11-10T12:02:27Z</updated>
+    <content type="html">&lt;div class="paragraph"&gt;
+&lt;p&gt;On behalf of the team and everyone who has contributed, it is my pleasure to announce the general availability of Spring Authorization Server 0.0.3.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;You can download it from &lt;a href="https://repo.spring.io/release/"&gt;repo.spring.io&lt;/a&gt; and Maven Central by using the module coordinates:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="listingblock"&gt;
+&lt;div class="content"&gt;
+&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="groovy"&gt;compile 'org.springframework.security.experimental:spring-security-oauth2-authorization-server:0.0.3'&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;For additional details on this new project, see the &lt;a href="https://spring.io/blog/2020/04/15/announcing-the-spring-authorization-server"&gt;initial announcement&lt;/a&gt; and &lt;a href="https://github.com/spring-projects-experimental/spring-authorization-server"&gt;project page&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;The main features delivered in this release are:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="ulist"&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;OAuth 2.0 Refresh Token Grant&amp;#8201;&amp;#8212;&amp;#8201;&lt;a href="https://tools.ietf.org/html/rfc6749#section-6"&gt;RFC 6749&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;OAuth 2.0 Token Revocation&amp;#8201;&amp;#8212;&amp;#8201;&lt;a href="https://tools.ietf.org/html/rfc7009"&gt;RFC 7009&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;See the &lt;a href="https://github.com/spring-projects-experimental/spring-authorization-server/releases/tag/0.0.3"&gt;release notes&lt;/a&gt; for complete details.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;To get started using Spring Authorization Server, see the &lt;a href="https://github.com/spring-projects-experimental/spring-authorization-server/tree/master/samples/boot/oauth2-integration"&gt;sample&lt;/a&gt; to become familiar with setup and configuration.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;We would love to gather your feedback as we strive to improve and build upon this release.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="paragraph"&gt;
+&lt;p&gt;&lt;a href="https://github.com/spring-projects-experimental/spring-authorization-server"&gt;Project Page&lt;/a&gt; | &lt;a href="https://github.com/spring-projects-experimental/spring-authorization-server/issues"&gt;GitHub Issues&lt;/a&gt; |  &lt;a href="https://app.zenhub.com/workspaces/authorization-server-5e8f3182b5e8f5841bfc4902/board?repos=248032165"&gt;ZenHub Board&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
+  </entry>
+  <entry>
+    <title>Spring Framework 5.3.1 and 5.2.11 available now</title>
+    <link rel="alternate" href="https://spring.io/blog/2020/11/10/spring-framework-5-3-1-and-5-2-11-available-now" />
+    <category term="releases" label="Releases" />
+    <author>
+      <name>Stéphane Nicoll</name>
+    </author>
+    <id>tag:spring.io,2020-11-10:4264</id>
+    <updated>2020-11-10T10:14:49Z</updated>
+    <content type="html">&lt;p&gt;On behalf of the team and everyone who has contributed, I am pleased to announce that Spring Framework &lt;code&gt;5.3.1&lt;/code&gt; and &lt;code&gt;5.2.11&lt;/code&gt; are available now.&lt;/p&gt;
+&lt;p&gt;Spring Framework &lt;code&gt;5.3.1&lt;/code&gt; includes &lt;a href="https://github.com/spring-projects/spring-framework/releases/tag/v5.3.1"&gt;29 fixes and improvements&lt;/a&gt;. Spring Framework &lt;code&gt;5.2.11&lt;/code&gt; includes &lt;a href="https://github.com/spring-projects/spring-framework/releases/tag/v5.2.11.RELEASE"&gt;10 selected fixes and improvements&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Stay tuned for follow-up Spring Boot releases later this week, including Spring Boot 2.4 GA!&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://projects.spring.io/spring-framework/"&gt;Project Page&lt;/a&gt; | &lt;a href="https://github.com/spring-projects/spring-framework"&gt;GitHub&lt;/a&gt; | &lt;a href="https://github.com/spring-projects/spring-framework/issues"&gt;Issues&lt;/a&gt; | &lt;a href="https://docs.spring.io/spring-framework/docs/5.3.1/spring-framework-reference"&gt;Documentation&lt;/a&gt;&lt;/p&gt;
+&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
+  </entry>
+  <entry>
+    <title>Spring Cloud Hoxton.SR9 has been released</title>
+    <link rel="alternate" href="https://spring.io/blog/2020/11/10/spring-cloud-hoxton-sr9-has-been-released" />
+    <category term="releases" label="Releases" />
+    <author>
+      <name>Olga Maciaszek-Sharma</name>
+    </author>
+    <id>tag:spring.io,2020-11-09:4262</id>
+    <updated>2020-11-10T09:54:02Z</updated>
+    <content type="html">&lt;p&gt;On behalf of the community, I am pleased to announce that the Service Release 9 (SR9) of the &lt;a href="https://cloud.spring.io"&gt;Spring Cloud Hoxton&lt;/a&gt; Release Train is available today. The release can be found in &lt;a href="https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dependencies/Hoxton.SR9/"&gt;Maven Central&lt;/a&gt;. You can check out the Hoxton &lt;a href="https://github.com/spring-projects/spring-cloud/wiki/Spring-Cloud-Hoxton-Release-Notes"&gt;release notes for more information&lt;/a&gt;.&lt;/p&gt;&lt;h2&gt;&lt;a href="#notable-changes-in-the-hoxton-release-train" class="anchor" name="notable-changes-in-the-hoxton-release-train"&gt;&lt;/a&gt;Notable Changes in the Hoxton Release Train&lt;/h2&gt;
+&lt;p&gt;See all issues included in this release &lt;a href="https://github.com/orgs/spring-cloud/projects/45"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;This was primarily a bug fix and documentation release.&lt;/p&gt;
+&lt;p&gt;See all of the included issues and pull requests at the &lt;a href="https://github.com/orgs/spring-cloud/projects/45"&gt;GitHub project&lt;/a&gt;. Hoxton.SR9 is compatible with Spring Boot 2.3.x and 2.2.x.&lt;/p&gt;&lt;h3&gt;&lt;a href="#spring-cloud-gateway" class="anchor" name="spring-cloud-gateway"&gt;&lt;/a&gt;Spring Cloud Gateway&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;Added support for &lt;a href="https://github.com/spring-cloud/spring-cloud-gateway/commit/fffcd23214dc60fe0da003cc1076bc50d9a6c0bd"&gt;setting SecureHeaders filter header values per route&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Added support for &lt;a href="https://github.com/spring-cloud/spring-cloud-gateway/pull/1942"&gt;exposing RouteDefinitions via an actuator endpoint&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Added &lt;a href="https://github.com/spring-cloud/spring-cloud-gateway/commit/fa0ffd0a2b456e0de85fd20beed73b6579c638c7"&gt;&lt;code&gt;BooleanOpSpec.not()&lt;/code&gt; predicate operator&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://github.com/spring-cloud/spring-cloud-gateway/commit/e4fc804fc2f3a4d9e2cbe3be6853a19ef034478d"&gt;Improved reactive LoadBalancer performance&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Added support for &lt;a href="https://github.com/spring-cloud/spring-cloud-gateway/commit/d8e53f118850ac0cd93f38b26d46f1e69dc8b829"&gt;disabling filters and predicates by a property&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Added the &lt;a href="https://github.com/spring-cloud/spring-cloud-gateway/commit/f09d8b2c5d390cf8f2ca905404f6bd03be50615e"&gt;possibility to customize gateway metrics prefix&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Support &lt;a href="https://github.com/spring-cloud/spring-cloud-gateway/pull/1930"&gt;case-insensitive MVC headers matching&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;h3&gt;&lt;a href="#spring-cloud-commons" class="anchor" name="spring-cloud-commons"&gt;&lt;/a&gt;Spring Cloud Commons&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;Added &lt;a href="https://github.com/spring-cloud/spring-cloud-commons/pull/832"&gt;support for blocking retries in SC LoadBalancer&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;h3&gt;&lt;a href="#spring-cloud-netflix" class="anchor" name="spring-cloud-netflix"&gt;&lt;/a&gt;Spring Cloud Netflix&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;Upgraded various dependencies&lt;/li&gt;
+  &lt;li&gt;Added &lt;a href="https://github.com/spring-cloud/spring-cloud-netflix/pull/3903"&gt;support for &lt;code&gt;ReactiveHealthIndicator&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;h3&gt;&lt;a href="#spring-cloud-openfeign" class="anchor" name="spring-cloud-openfeign"&gt;&lt;/a&gt;Spring Cloud OpenFeign&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;Added the possibility &lt;a href="https://github.com/spring-cloud/spring-cloud-openfeign/pull/420"&gt;to configure clients to send default headers&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Added support for &lt;a href="https://github.com/spring-cloud/spring-cloud-openfeign/issues/393"&gt;sorting request interceptors&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Added support for &lt;a href="https://github.com/spring-cloud/spring-cloud-openfeign/commit/db3513b97b3de52f48b477d2866ffde50e97b53f"&gt;Spring Retry with Spring Cloud LoadBalancer&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Upgraded various dependencies&lt;/li&gt;
+&lt;/ul&gt;&lt;h3&gt;&lt;a href="#spring-cloud-contract" class="anchor" name="spring-cloud-contract"&gt;&lt;/a&gt;Spring Cloud Contract&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;Added &lt;a href="https://github.com/spring-cloud/spring-cloud-contract/pull/1539"&gt;option to disable &lt;code&gt;.git&lt;/code&gt; suffix in git URLs&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;h3&gt;&lt;a href="#spring-cloud-sleuth" class="anchor" name="spring-cloud-sleuth"&gt;&lt;/a&gt;Spring Cloud Sleuth&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;Added &lt;a href="https://github.com/spring-cloud/spring-cloud-sleuth/pull/1759"&gt;instrumentation for &lt;code&gt;RetryableFeignBlockingLoadBalancerClient&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;h3&gt;&lt;a href="#spring-cloud-config" class="anchor" name="spring-cloud-config"&gt;&lt;/a&gt;Spring Cloud Config&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;Added support for &lt;a href="https://github.com/spring-cloud/spring-cloud-config/issues/1715"&gt;optionally sending &lt;code&gt;application/json&lt;/code&gt; instead of &lt;code&gt;v2&lt;/code&gt; media type&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://github.com/spring-cloud/spring-cloud-config/commit/52e2d9bf64f80ee9cc28954b020849132b1f8328"&gt;Make throwing an exception when a repository can&amp;rsquo;t be read optional&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;h3&gt;&lt;a href="#spring-cloud-consul" class="anchor" name="spring-cloud-consul"&gt;&lt;/a&gt;Spring Cloud Consul&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href="https://github.com/spring-cloud/spring-cloud-consul/commit/4a6d7027f04f40e2dfe0aaa2a3f5bc6373e37e30"&gt;Allowed &lt;code&gt;ConsulHealthIndicator&lt;/code&gt; to bypass the services query&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://github.com/spring-cloud/spring-cloud-config/pull/1653"&gt;Allowed ignoring SQL exceptions&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr/&gt;
+&lt;p&gt;The following modules were updated as part of Hoxton.SR9:&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Module &lt;/th&gt;
+      &lt;th&gt;Version &lt;/th&gt;
+      &lt;th&gt;Issues&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Spring Cloud Starter Build &lt;/td&gt;
+      &lt;td&gt;Hoxton.SR9 &lt;/td&gt;
+      &lt;td&gt;&amp;nbsp;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Spring Cloud Netflix &lt;/td&gt;
+      &lt;td&gt;2.2.6.RELEASE &lt;/td&gt;
+      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-netflix/milestone/94?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Spring Cloud Openfeign &lt;/td&gt;
+      &lt;td&gt;2.2.5.RELEASE &lt;/td&gt;
+      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-openfeign/milestone/29?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Spring Cloud Config &lt;/td&gt;
+      &lt;td&gt;2.2.6.RELEASE &lt;/td&gt;
+      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-config/milestone/81?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Spring Cloud Aws &lt;/td&gt;
+      &lt;td&gt;2.2.5.RELEASE &lt;/td&gt;
+      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-aws/milestone/31?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Spring Cloud Gateway &lt;/td&gt;
+      &lt;td&gt;2.2.6.RELEASE &lt;/td&gt;
+      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-gateway/milestone/42?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Spring Cloud Gcp &lt;/td&gt;
+      &lt;td&gt;1.2.6.RELEASE &lt;/td&gt;
+      &lt;td&gt;&amp;nbsp;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Spring Cloud Commons &lt;/td&gt;
+      &lt;td&gt;2.2.6.RELEASE &lt;/td&gt;
+      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-commons/milestone/79?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Spring Cloud Consul &lt;/td&gt;
+      &lt;td&gt;2.2.5.RELEASE &lt;/td&gt;
+      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-consul/milestone/50?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Spring Cloud Contract &lt;/td&gt;
+      &lt;td&gt;2.2.5.RELEASE &lt;/td&gt;
+      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-contract/milestone/69?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Spring Cloud Kubernetes &lt;/td&gt;
+      &lt;td&gt;1.1.7.RELEASE &lt;/td&gt;
+      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-kubernetes/milestone/25?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Spring Cloud Sleuth &lt;/td&gt;
+      &lt;td&gt;2.2.6.RELEASE &lt;/td&gt;
+      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-sleuth/milestone/82?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Spring Cloud Vault &lt;/td&gt;
+      &lt;td&gt;2.2.6.RELEASE &lt;/td&gt;
+      &lt;td&gt;&amp;nbsp;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Spring Cloud Zookeeper &lt;/td&gt;
+      &lt;td&gt;2.2.4.RELEASE &lt;/td&gt;
+      &lt;td&gt;&amp;nbsp;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Spring Cloud CLI &lt;/td&gt;
+      &lt;td&gt;2.2.3.RELEASE &lt;/td&gt;
+      &lt;td&gt;&amp;nbsp;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;As always, we welcome feedback on &lt;a href="https://github.com/spring-cloud/"&gt;GitHub&lt;/a&gt;, on &lt;a href="https://gitter.im/spring-cloud/spring-cloud"&gt;Gitter&lt;/a&gt;, on &lt;a href="https://stackoverflow.com/questions/tagged/spring-cloud"&gt;Stack Overflow&lt;/a&gt;, or on &lt;a href="https://twitter.com/SpringCloud"&gt;Twitter&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;To get started with Maven with a BOM (dependency management only):&lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint xml"&gt;&amp;lt;dependencyManagement&amp;gt;&#xD;
+    &amp;lt;dependencies&amp;gt;&#xD;
+        &amp;lt;dependency&amp;gt;&#xD;
+            &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;&#xD;
+            &amp;lt;artifactId&amp;gt;spring-cloud-dependencies&amp;lt;/artifactId&amp;gt;&#xD;
+            &amp;lt;version&amp;gt;Hoxton.SR9&amp;lt;/version&amp;gt;&#xD;
+            &amp;lt;type&amp;gt;pom&amp;lt;/type&amp;gt;&#xD;
+            &amp;lt;scope&amp;gt;import&amp;lt;/scope&amp;gt;&#xD;
+        &amp;lt;/dependency&amp;gt;&#xD;
+    &amp;lt;/dependencies&amp;gt;&#xD;
+&amp;lt;/dependencyManagement&amp;gt;&#xD;
+&amp;lt;dependencies&amp;gt;&#xD;
+    &amp;lt;dependency&amp;gt;&#xD;
+        &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;&#xD;
+        &amp;lt;artifactId&amp;gt;spring-cloud-starter-config&amp;lt;/artifactId&amp;gt;&#xD;
+    &amp;lt;/dependency&amp;gt;&#xD;
+    &amp;lt;dependency&amp;gt;&#xD;
+        &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;&#xD;
+        &amp;lt;artifactId&amp;gt;spring-cloud-starter-netflix-eureka-client&amp;lt;/artifactId&amp;gt;&#xD;
+    &amp;lt;/dependency&amp;gt;&#xD;
+    ...&#xD;
+&amp;lt;/dependencies&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;or with Gradle:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint groovy"&gt;buildscript {&#xD;
+  dependencies {&#xD;
+    classpath &amp;quot;io.spring.gradle:dependency-management-plugin:1.0.10.RELEASE&amp;quot;&#xD;
+  }&#xD;
+}&#xD;
+&#xD;
+apply plugin: &amp;quot;io.spring.dependency-management&amp;quot;&#xD;
+&#xD;
+dependencyManagement {&#xD;
+  imports {&#xD;
+    mavenBom &amp;#39;org.springframework.cloud:spring-cloud-dependencies:Hoxton.SR9&amp;#39;&#xD;
+  }&#xD;
+}&#xD;
+&#xD;
+dependencies {&#xD;
+  compile &amp;#39;org.springframework.cloud:spring-cloud-starter-config&amp;#39;&#xD;
+  compile &amp;#39;org.springframework.cloud:spring-cloud-starter-netflix-eureka-client&amp;#39;&#xD;
+  //...&#xD;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
+  </entry>
   <entry>
     <title>Spring Data 2020.0 - New and Noteworthy - A general Overview</title>
     <link rel="alternate" href="https://spring.io/blog/2020/11/06/spring-data-2020-0-new-and-noteworthy-a-general-overview" />
@@ -676,417 +1220,6 @@ Artem&lt;/p&gt;
 &lt;p&gt;Spring MVC users can get better performance with PathPattern parsing (see Rossen&amp;rsquo;s &lt;a href="https://spring.io/blog/2020/06/30/url-matching-with-pathpattern-in-spring-mvc"&gt;blog post&lt;/a&gt;). For test scenarios, we provide a unified API for MockMvc as well as full HTTP tests, and MockMvc comes with a revised Kotlin DSL. On the WebFlux side, a fully reactive message reader for multipart requests is included now, as well as a WebClient connector for &lt;a href="https://hc.apache.org/httpcomponents-client-5.0.x/"&gt;Apache Http Components 5&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;Spring Framework 5.3 is a recommended upgrade for all 5.x and 4.x users. It establishes a stable and future-proof production branch with extended maintenance until 2024, serving as the successor of the equally long-lived 4.3.x line which will reach its end of maintenance soon (December 2020).&lt;/p&gt;
 &lt;p&gt;Cheers,&lt;br/&gt;Juergen&lt;/p&gt;
-&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
-  </entry>
-  <entry>
-    <title>Spring Tools 4.8.1 released</title>
-    <link rel="alternate" href="https://spring.io/blog/2020/10/27/spring-tools-4-8-1-released" />
-    <category term="releases" label="Releases" />
-    <author>
-      <name>Martin Lippert</name>
-    </author>
-    <id>tag:spring.io,2020-10-27:4240</id>
-    <updated>2020-10-27T15:36:03Z</updated>
-    <content type="html">&lt;p&gt;Dear Spring Community,&lt;/p&gt;
-&lt;p&gt;I am happy to announce the 4.8.1 release of the Spring Tools 4 for Eclipse, Visual Studio Code, and Theia.&lt;/p&gt;&lt;h4&gt;&lt;a href="#quick-reminder" class="anchor" name="quick-reminder"&gt;&lt;/a&gt;quick reminder&lt;/h4&gt;
-&lt;ul&gt;
-  &lt;li&gt;the Eclipse-based distribution of the Spring Tools 4 requires a JDK11 (or newer) to run on&lt;/li&gt;
-  &lt;li&gt;the Eclipse-based distribution ships with an embedded JDK15 runtime, no need to install or configure a specific JDK to run the IDE on anymore&lt;/li&gt;
-&lt;/ul&gt;&lt;h4&gt;&lt;a href="#additional-changes-and-fixes" class="anchor" name="additional-changes-and-fixes"&gt;&lt;/a&gt;additional changes and fixes&lt;/h4&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;em&gt;(Spring Boot)&lt;/em&gt; new: Added support for Spring Boot multi-document properties files (&lt;a href="https://github.com/spring-projects/sts4/issues/533"&gt;#533&lt;/a&gt;)&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Spring Boot)&lt;/em&gt; fixed: Support escaping of map keys with &amp;lsquo;[]&amp;rsquo; in Spring Boot property yaml files&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Spring Boot)&lt;/em&gt; fixed: Tolerate &amp;lsquo;.[&amp;rsquo; for map navigation in .properties file&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Eclipse)&lt;/em&gt; improvement: support container image creation and container deployment of Spring Boot apps without maven wrapper&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Eclipse)&lt;/em&gt; improvement: better process label for live hovers from boot apps running in docker&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Eclipse)&lt;/em&gt; improvement: allow docker-deployed boot apps to find each other (via simple network setup inside of docker)&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Eclipse)&lt;/em&gt; improvement: automatically disable code hotswap when running a Spring Boot app with devtools in debug mode (to avoid conflicts between devtools and hot swap both try to update code in the running process)&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Eclipse)&lt;/em&gt; update: updated embedded JRE to JDK15, including the src.zip now&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Eclipse)&lt;/em&gt; update: re-organized Spring-related preference pages&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Eclipse)&lt;/em&gt; update: removed &lt;code&gt;-Xverify:none&lt;/code&gt; and &lt;code&gt;-noverify&lt;/code&gt; from the default fast startup settings for boot app launch configs&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Eclipse)&lt;/em&gt; update: default PWS endpoint URL removed from the dialog to create Cloud Foundry targets in the boot dashboard (since PWS is going away)&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Eclipse)&lt;/em&gt; fixed: errors appear in log when pausing docker containers&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Eclipse)&lt;/em&gt; fixed: do not show breakpoint warning when starting up a Spring Boot app&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Eclipse)&lt;/em&gt; fixed: added missing high-res and dark-mode-compatible icons for docker support in Spring Boot dashboard&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Eclipse)&lt;/em&gt; fixed: sometimes live hovers do not show up automatically after launching a boot app in docker&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Eclipse)&lt;/em&gt; fixed: improved stability when deploying multiple apps simultaneously to docker via the boot dashboard&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Eclipse)&lt;/em&gt; fixed: problem showing live request mappings for eureka-based apps&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Eclipse)&lt;/em&gt; fixed: dropdown in Spring Symbols view shows up with transparent background on Linux&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;(Concourse)&lt;/em&gt; fixed: support pipeline directory as well see (&lt;a href="https://github.com/spring-projects/sts4/issues/525"&gt;#525&lt;/a&gt;)&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;To download the distribution for Eclipse and find links to the marketplace entries for Visual Studio Code and Theia, please go visit:&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;Spring Tools 4: &lt;a href="https://spring.io/tools/"&gt;https://spring.io/tools/&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Detailed changes can be found here: &lt;a href="https://github.com/spring-projects/sts4/wiki/Changelog#2020-10-23-481-release-incl-language-servers-version-1230"&gt;https://github.com/spring-projects/sts4/wiki/Changelog#2020-10-23-481-release-incl-language-servers-version-1230&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Spring Tools 4.8.2 is scheduled to be released in late November 2020.&lt;/p&gt;
-&lt;p&gt;Enjoy!&lt;/p&gt;
-&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
-  </entry>
-  <entry>
-    <title>Spring Framework 5.2.10 and 5.1.19 available now</title>
-    <link rel="alternate" href="https://spring.io/blog/2020/10/27/spring-framework-5-2-10-and-5-1-19-available-now" />
-    <category term="releases" label="Releases" />
-    <author>
-      <name>Stéphane Nicoll</name>
-    </author>
-    <id>tag:spring.io,2020-10-27:4239</id>
-    <updated>2020-10-27T14:31:23Z</updated>
-    <content type="html">&lt;p&gt;On behalf of the team and everyone who has contributed, I am pleased to announce that Spring Framework &lt;code&gt;5.2.10&lt;/code&gt; and &lt;code&gt;5.1.19&lt;/code&gt; are available now.&lt;/p&gt;
-&lt;p&gt;Spring Framework &lt;code&gt;5.2.10&lt;/code&gt; includes &lt;a href="https://github.com/spring-projects/spring-framework/releases/tag/v5.2.10.RELEASE"&gt;27 fixes and improvements&lt;/a&gt;. Spring Framework 5.1.19 includes &lt;a href="https://github.com/spring-projects/spring-framework/releases/tag/v5.1.19.RELEASE"&gt;16 selected fixes and improvements&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Stay tuned for Spring Framework 5.3 GA and follow-up Spring Boot releases &lt;code&gt;2.1.18&lt;/code&gt;, &lt;code&gt;2.2.11&lt;/code&gt;, &lt;code&gt;2.3.5&lt;/code&gt;, and &lt;code&gt;2.4.0-RC1&lt;/code&gt;!&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://projects.spring.io/spring-framework/"&gt;Project Page&lt;/a&gt; | &lt;a href="https://github.com/spring-projects/spring-framework"&gt;GitHub&lt;/a&gt; | &lt;a href="https://github.com/spring-projects/spring-framework/issues"&gt;Issues&lt;/a&gt; | &lt;a href="https://docs.spring.io/spring-framework/docs/5.2.10.RELEASE/spring-framework-reference"&gt;Documentation&lt;/a&gt;&lt;/p&gt;
-&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
-  </entry>
-  <entry>
-    <title>Case Study: Aggregator Function and Processor</title>
-    <link rel="alternate" href="https://spring.io/blog/2020/10/26/case-study-aggregator-function-and-processor" />
-    <category term="engineering" label="Engineering" />
-    <author>
-      <name>Artem Bilan</name>
-    </author>
-    <id>tag:spring.io,2020-10-23:4237</id>
-    <updated>2020-10-26T16:52:09Z</updated>
-    <content type="html">&lt;div class="paragraph"&gt;
-&lt;p&gt;This article is part of a blog series that explores the newly redesigned Spring Cloud Stream applications based on Java Functions.
-In this episode, we are investigating the Aggregator function and its relationship with the Splitter function.
-We will see how we can customize the default behavior.
-We will also take a look at the importance of configuring a shared message store for the aggregator.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Here are all the previous parts of this blog series.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="ulist"&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/07/13/introducing-java-functions-for-spring-cloud-stream-applications-part-0"&gt;Introducing Function Based Streaming Applications&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/07/20/introducing-java-functions-for-spring-cloud-stream-applications-part-1"&gt;Function Composition with Streaming Applications&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/07/27/creating-a-supplier-function-and-generating-spring-cloud-stream-source"&gt;How to Build a Supplier and Source Application&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/08/03/creating-a-function-for-consuming-data-and-generating-spring-cloud-stream-sink-applications"&gt;How to Build a Consumer and Sink Application&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/08/10/case-study-build-and-run-a-streaming-application-using-an-http-source-and-a-jdbc-sink"&gt;Build and Run a Simple Stream Application&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/08/17/case-study-http-request-function-and-processor"&gt;Case Study: HTTP Request Function and Processor&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/08/25/case-study-reading-from-a-file-and-writing-to-mongodb"&gt;Case Study: File Source and MongoDB Sink&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/09/10/case-study-relational-database-source-and-file-sink"&gt;Case Study: Relational Database Source and File Sink&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/09/29/case-study-remote-file-ingest-with-spring-cloud-data-flow"&gt;Case Study: Remote File Ingest with Spring Cloud Data Flow&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="aggregator-function"&gt;&lt;a class="anchor" href="#aggregator-function"&gt;&lt;/a&gt;Aggregator function&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The Aggregator function is the basis for the &lt;code&gt;&lt;a href="https://docs.spring.io/spring-integration/docs/current/reference/html/message-routing.html#aggregator"&gt;AggregatingMessageHandler&lt;/a&gt;&lt;/code&gt; from Spring Integration, inheriting most of its functionality and exposes commonly used aggregator options as configuration properties.
-See &lt;code&gt;AggregatorFunctionProperties&lt;/code&gt; (or next section) for more information.
-The aggregator function is fully reactive and defined as a &lt;code&gt;Function&amp;lt;Flux&amp;lt;Message&amp;lt;?&amp;gt;&amp;gt;, Flux&amp;lt;Message&amp;lt;?&amp;gt;&amp;gt;&lt;/code&gt;.
-That’s because an aggregator logic does not require it to produce a reply immediately.
-Rather, it stores the current message in a message store, grouped with other messages to be collected or reduced to some result, until the conditions required to release the result are met.
-This way it feels natural to have inbound messages as a stream (&lt;code&gt;Flux&lt;/code&gt;) and let them be combined via an aggregator to output stream (also a &lt;code&gt;Flux&lt;/code&gt;).
-So, what we just need is to &lt;code&gt;subscribe()&lt;/code&gt; to the result of the Aggregator function to initiate the flow.
-In fact, this is exactly what happens automatically when use such a reactive function in Spring Cloud Stream application when we use: the framework builds for us a &lt;code&gt;Flux&lt;/code&gt; of messages from input destination and processes a resulting &lt;code&gt;Flux&lt;/code&gt; on output destination.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="usage"&gt;&lt;a class="anchor" href="#usage"&gt;&lt;/a&gt;Usage&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Typically an aggregator is used in combination with the &lt;a href="https://docs.spring.io/spring-integration/docs/current/reference/html/message-routing.html#splitter"&gt;Splitter&lt;/a&gt;, which transforms a single incoming message into several outgoing message inluding some sequence detail headers.
-After some individual item processing (transforming, enriching etc.) we add an aggregator to combine those items back to a single message.
-The mentioned sequence detail headers are used as default correlation and release strategies to store messages in groups and make a decision when and how to combine and produce a single message.
-It feels natural to build such processing logic with function composition, which we will discuss later.
-But for now let&amp;#8217;s imagine (for simplicity) that we have some data we would like to combine into a single message!&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;First of all we need to add a dependency for the aggregator function in our Spring Boot project:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="xml"&gt;&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud.fn&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;aggregator-function&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;And that&amp;#8217;s it!
-The aggregator function bean will be auto-configured just enough to let us autowire the function into our code and use it:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;@Autowired
-Function&amp;lt;Flux&amp;lt;Message&amp;lt;?&amp;gt;&amp;gt;, Flux&amp;lt;Message&amp;lt;?&amp;gt;&amp;gt;&amp;gt; aggregatorFunction;
-...
-Flux&amp;lt;Message&amp;lt;?&amp;gt;&amp;gt; input =
-        Flux.just(MessageBuilder.withPayload("2")
-                .setHeader(IntegrationMessageHeaderAccessor.CORRELATION_ID, "some_mey")
-                .setHeader(IntegrationMessageHeaderAccessor.SEQUENCE_NUMBER, 2)
-                .setHeader(IntegrationMessageHeaderAccessor.SEQUENCE_SIZE, 2)
-                .build(),
-         MessageBuilder.withPayload("1")
-                .setHeader(IntegrationMessageHeaderAccessor.CORRELATION_ID, "some_mey")
-                .setHeader(IntegrationMessageHeaderAccessor.SEQUENCE_NUMBER, 1)
-                .setHeader(IntegrationMessageHeaderAccessor.SEQUENCE_SIZE, 2)
-                .build());
-
-Flux&amp;lt;Message&amp;lt;?&amp;gt;&amp;gt; output = this.aggregatorFunction.apply(input);
-
-output.as(StepVerifier::create)
-            .assertNext((message) -&amp;gt;
-                    assertThat(message)
-                            .extracting(Message::getPayload)
-                            .isInstanceOf(List.class)
-                            .asList()
-                            .hasSize(2)
-                            .contains("1", "2"))
-            .thenCancel()
-            .verify();&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;In this code snippet we demonstrate how two simple messages with predefined sequence details are combined to a single &lt;code&gt;List&amp;lt;String&amp;gt;&lt;/code&gt;.
-All the hard work is done inside the &lt;code&gt;aggregatorFunction&lt;/code&gt; and its default correlation and release strategies.
-This also includes a default group combinator options which builds a list of payloads from messages in the released group.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;More complex use-cases and configuration options we will review in the next sections.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="a-persistent-state-store"&gt;&lt;a class="anchor" href="#a-persistent-state-store"&gt;&lt;/a&gt;A persistent state store&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The data and information we process and operate in our application is really the most important part of the application.
-We need to think twice about when to keep the data in memory instead of some external store.
-In most cases we would use some database for a state store and/or messaging middleware to prevent data loss between producer and consumer.
-As an added bonus, this gives different instances in a cluster an access to the shared store for smooth distributed computation.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;A persistent state store is not required for the Aggregator function to work, but is necessary in production to avoid data loss and ensure fail-over.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="configuration"&gt;&lt;a class="anchor" href="#configuration"&gt;&lt;/a&gt;Configuration&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The configuration options (&lt;code&gt;AggregatorFunctionProperties&lt;/code&gt;) for the Aggregator functions are straight forward and fully aligned with high-level options for the &lt;code&gt;&lt;a href="https://docs.spring.io/spring-integration/docs/current/reference/html/message-routing.html#aggregator"&gt;AggregatingMessageHandler&lt;/a&gt;&lt;/code&gt;.
-Here they are:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="ulist"&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;code&gt;correlation&lt;/code&gt; - a SpEL expression to determine a correlation key (group id) from the incoming messages.
-Such an expression (if provided) builds an &lt;code&gt;ExpressionEvaluatingCorrelationStrategy&lt;/code&gt; for the underlying &lt;code&gt;AggregatingMessageHandler&lt;/code&gt;.
-By default (when not provided), the &lt;code&gt;AggregatingMessageHandler&lt;/code&gt; uses a &lt;code&gt;HeaderAttributeCorrelationStrategy&lt;/code&gt; which is based on the &lt;code&gt;IntegrationMessageHeaderAccessor.CORRELATION_ID&lt;/code&gt; - a header which can be populated upstream by the splitter, or &lt;code&gt;PublishSubscribeChannel&lt;/code&gt; or recipient-list router.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;code&gt;release&lt;/code&gt; - a SpEL expression to determine if stored message group should be released and emitted as an output message.
-Such an expression (if provided) builds an &lt;code&gt;ExpressionEvaluatingReleaseStrategy&lt;/code&gt; for the underlying &lt;code&gt;AggregatingMessageHandler&lt;/code&gt;.
-By default (when not provided), the &lt;code&gt;AggregatingMessageHandler&lt;/code&gt; uses a &lt;code&gt;SimpleSequenceSizeReleaseStrategy&lt;/code&gt; which is based on the stored group size and an &lt;code&gt;IntegrationMessageHeaderAccessor.SEQUENCE_SIZE&lt;/code&gt; - a header which can be populated upstream by the splitter, or &lt;code&gt;PublishSubscribeChannel&lt;/code&gt; or recipient-list router.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;code&gt;aggregation&lt;/code&gt; - a SpEL expression to build an output result from the released message group.
-This expression (if provided) contributes to the &lt;code&gt;ExpressionEvaluatingMessageGroupProcessor&lt;/code&gt; for the underlying &lt;code&gt;AggregatingMessageHandler&lt;/code&gt;.
-By default (when not provided), the &lt;code&gt;AggregatingMessageHandler&lt;/code&gt; uses a &lt;code&gt;DefaultAggregatingMessageGroupProcessor&lt;/code&gt; which just combines payloads of messages in group into the &lt;code&gt;List&lt;/code&gt; and merge their headers.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;code&gt;groupTimeout&lt;/code&gt; - a SpEL expression to schedule a background task for expiring the group when no more messages arrive to it.
-See more information about this option in &lt;a href="https://docs.spring.io/spring-integration/docs/current/reference/html/message-routing.html#agg-and-group-to"&gt;Spring Integration&lt;/a&gt;.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;code&gt;messageStoreType&lt;/code&gt; - a value from the &lt;code&gt;AggregatorFunctionProperties.MessageStoreType&lt;/code&gt; constant class to indicate which &lt;code&gt;MessageGroupStore&lt;/code&gt; implementation to use for storing the messages until the group for them is released.
-The supported &lt;code&gt;MessageGroupStore&lt;/code&gt; are: &lt;code&gt;ConfigurableMongoDbMessageStore&lt;/code&gt;, &lt;code&gt;RedisMessageStore&lt;/code&gt;, &lt;code&gt;GemfireMessageStore&lt;/code&gt;, &lt;code&gt;JdbcMessageStore&lt;/code&gt; and &lt;code&gt;SimpleMessageStore&lt;/code&gt; which is default one and stores messages on in the memory.
-This is the most important option which should be chosen according the target environment and available persistent store.
-It has more value when an Aggregator function is deployed as clustered instance (e.g. via Spring Cloud Data Flow when used as a part of the &lt;code&gt;aggregator-processor&lt;/code&gt;), so sharing the state you may produce messages into an aggregator on one instance, but they can be released on a different one.
-And with this you won&amp;#8217;t lose messages when application is crashed.
-The dependencies for the &lt;code&gt;MessageGroupStore&lt;/code&gt; implementations are packed into the final function uber jar and auto-configured according this options.
-Only the difference comes with the JDBC, where we have to supply an appropriate driver according target environment requirements.
-See more information about &lt;code&gt;MessageGroupStore&lt;/code&gt; abstraction in &lt;a href="https://docs.spring.io/spring-integration/docs/current/reference/html/system-management.html#message-store"&gt;Spring Integration System Management&lt;/a&gt; and in the previous blog post how to &lt;a href="https://spring.io/blog/2020/09/10/case-study-relational-database-source-and-file-sink"&gt;supply JDBC driver&lt;/a&gt;.
-All the configuration options for those persistent stores are just the same what Spring Boot provides for us to auto-configure them.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;code&gt;messageStoreEntity&lt;/code&gt; - this option is specific only for some &lt;code&gt;MessageGroupStore&lt;/code&gt; implementation: it refers to the client region for Gemfire/Geode; the table prefix for JDBC; a collection name in case of MongoDB.
-For the rest of implementations it is ignored.&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;See more information about those components in &lt;a href="https://docs.spring.io/spring-integration/docs/current/reference/html/index.html"&gt;Spring Integration&lt;/a&gt; and respective function implementations (if any) in the &lt;a href="https://github.com/spring-cloud/stream-applications"&gt;Stream Applications&lt;/a&gt; project.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;So, if we want to run an Aggregator function (as a standalone, as a Spring Cloud Stream &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/applications/processor/aggregator-processor"&gt;processor&lt;/a&gt; or as a part of Spring Cloud Data Flow stream definition) with some custom properties and against shared MongoDB store, we may declare it like this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre&gt;java -jar aggregator-processor-kafka-3.0.0-SNAPSHOT.jar
-    --aggregator.correlation=T(Thread).currentThread().id
-    --aggregator.release=!messages.?[payload == 'bar'].empty
-    --aggregator.aggregation=#this.?[payload == 'foo'].![payload]
-    --aggregator.messageStoreType=mongodb
-    --aggregator.message-store-entity=aggregatorTest
-    --spring.data.mongodb.uri=mongodb://localhost/test&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Where the values for these properties are:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="ulist"&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;code&gt;aggregator.correlation&lt;/code&gt; - the consumer thread id as a key for messages to group;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;code&gt;aggregator.release&lt;/code&gt; - a SpEL expression against message group to release it only when &lt;code&gt;bar&lt;/code&gt; payload has arrived;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;code&gt;aggregator.aggregation&lt;/code&gt; - a SpEL expression to select and project a message group collection where only messages with &lt;code&gt;foo&lt;/code&gt; payload are combined to the final result;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;code&gt;aggregator.messageStoreType&lt;/code&gt; - use a MongoDb &lt;code&gt;MessageGroupStore&lt;/code&gt; implementation;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;code&gt;aggregator.message-store-entity&lt;/code&gt; - a collection name in MongoDb database;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;code&gt;spring.data.mongodb.uri&lt;/code&gt; - the MongoDb database connection.&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The same configuration properties set remains unaffected even if we compose this function with others in the custom Spring Boot application.
-See the next section for more information.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="composition"&gt;&lt;a class="anchor" href="#composition"&gt;&lt;/a&gt;Composition&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The Aggregator function may not make sense by itself in a production solution.
-Of course, in most cases, it is used in combination with other upstream and downstream functions.
-As mentioned before, it is typical to have an aggregator to be composed with a &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/functions/function/splitter-function"&gt;splitter&lt;/a&gt; pre-processing.
-It is possible to compose these functions programmatically using Java API via &lt;code&gt;Function.andThan()&lt;/code&gt; and &lt;code&gt;Function.compose()&lt;/code&gt;, but, since these methods are very type strict, we would need to perform some intermediate conversions between to satisfy functions' inputs and outputs.
-With the &lt;a href="https://spring.io/projects/spring-cloud-function"&gt;Spring Cloud Function&lt;/a&gt; library on board,  we can bypass the hard programming work of writing various conversions, while retaining the required sequence details message headers.
-We rather will rely on the type inference and out-of-the-box conversion capabilities in the framework and to keep our composition as simple as possible.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Let&amp;#8217;s assume we have an input JSON like this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="json"&gt;{
-  "store": {
-    "book": [
-      {
-        "category": "reference",
-        "author": "Nigel Rees",
-        "title": "Sayings of the Century",
-        "price": 8.95
-      },
-      {
-        "category": "fiction",
-        "author": "Evelyn Waugh",
-        "title": "Sword of Honour",
-        "price": 12.99
-      },
-      {
-        "category": "fiction",
-        "author": "Herman Melville",
-        "title": "Moby Dick",
-        "isbn": "0-553-21311-3",
-        "price": 8.99
-      },
-      {
-        "category": "fiction",
-        "author": "J. R. R. Tolkien",
-        "title": "The Lord of the Rings",
-        "isbn": "0-395-19395-8",
-        "price": 22.99
-      }
-    ]
-  }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;And our task is to provided the book names as a single comma-delimited string.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;We just need to compose three out-of-the-box functions into a single Spring Cloud Function (or Stream) application.
-The dependencies for these functions are: &lt;code&gt;splitter-function&lt;/code&gt;, &lt;code&gt;spel-function&lt;/code&gt; and our &lt;code&gt;aggregator-function&lt;/code&gt;.
-The configuration properties for such an application might be like this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre&gt;spring.cloud.function.definition=splitterFunction|spelFunction|aggregatorFunction
-splitter.expression=#jsonPath(payload,'$.store.book')
-spel.function.expression=title
-aggregator.aggregation=T(org.springframework.util.StringUtils).collectionToCommaDelimitedString(#this.![payload])&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;We could use a similar stream definition and configuration with Spring Cloud Data Flow.
-The only difference is that messages from/to the functions will travel over the binder, using pre-built processor applications.
-You could actually use this composition in something like the &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/applications/source/mongodb-source"&gt;Mongo DB source&lt;/a&gt;.
-One more point to keep in mind with Spring Cloud Data Flow is that Aggregator function is type-agnostic and consumes messages with a &lt;code&gt;byte[]&lt;/code&gt; payload.
-If you are planning to perform some complex logic against payload, as in the above expressions, you probably need to compose this function with one upstream to convert the &lt;code&gt;byte[]&lt;/code&gt; payload into a domain object or some other compatible type like &lt;code&gt;HashMap&lt;/code&gt;.
-If payload is a JSON representation, it always can be accessed with a &lt;code&gt;#jsonPath()&lt;/code&gt; SpEL function we showed above for splitter expression.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;See more information about &lt;a href="https://spring.io/blog/2020/07/20/introducing-java-functions-for-spring-cloud-stream-applications-part-1"&gt;functions composition&lt;/a&gt; in one of the previous blog post for this series.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="conclusion"&gt;&lt;a class="anchor" href="#conclusion"&gt;&lt;/a&gt;Conclusion&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;This blog blog walked through the details of an Aggregator &lt;code&gt;Function&lt;/code&gt; and how it is used in the Spring Cloud Stream Aggregator Processor.
-We also looked at how to use the configuration properties for this function.
-We then took a deep dive into a few variants of using the aggregator in a standalone application, exploring various features along the way.
-Finally, we saw how we can easily switch &lt;code&gt;MessageGroupStore&lt;/code&gt; implementation for persistent state in the aggregator between messages.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="stay-tuned"&gt;&lt;a class="anchor" href="#stay-tuned"&gt;&lt;/a&gt;Stay tuned&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;This series is going to continue. In the next coming weeks, we will look at more functions and applications.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
-  </entry>
-  <entry>
-    <title>A Bootiful Podcast: Optic CEO Aidan Cunniffe on OpenAPI, contract testing, and so much more</title>
-    <link rel="alternate" href="https://spring.io/blog/2020/10/22/a-bootiful-podcast-optic-ceo-aidan-cunniffe-on-openapi-contract-testing-and-so-much-more" />
-    <category term="engineering" label="Engineering" />
-    <author>
-      <name>Josh Long</name>
-    </author>
-    <id>tag:spring.io,2020-10-22:4236</id>
-    <updated>2020-10-22T20:47:55Z</updated>
-    <content type="html">&lt;p&gt;Hi, Spring fans! In this installment &lt;a href="http://twitter.com/starbuxman"&gt;Josh Long (@starbuxman)&lt;/a&gt; talks to &lt;a href="http://twitter.com/UseOptic"&gt;Optic (@UseOptic)&lt;/a&gt; CEO &lt;a href="http://twitter.com/UseOptic"&gt;Aidan Cunniffe (@aidandcunniffe)&lt;/a&gt; about OpenAPI, contract testing, and so much more &lt;/p&gt;
-&lt;p&gt;Get the Spring &lt;/p&gt;
-&lt;p&gt;&lt;iframe title="Optic CEO Aidan Cunniffe on OpenAPI, contract testing, and so much more " height="122" width="100%" style="border: none;" scrolling="no" data-name="pb-iframe-player" src="https://www.podbean.com/media/player/q7sjn-f02091?from=pb6admin&amp;download=1&amp;version=1&amp;auto=0&amp;share=1&amp;download=1&amp;rtl=0&amp;fonts=Helvetica&amp;skin=1&amp;pfauth=&amp;btn-skin=107"&gt;&lt;/iframe&gt;&lt;/p&gt;
 &lt;!-- rendered by Sagan Renderer Service --&gt;</content>
   </entry>
 </feed>
