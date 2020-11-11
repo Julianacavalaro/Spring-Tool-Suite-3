@@ -5,7 +5,88 @@
   <link rel="self" href="https://spring.io/blog.atom" />
   <id>http://spring.io/blog.atom</id>
   <icon>https://spring.io/favicon.ico</icon>
-  <updated>2020-11-10T15:37:34Z</updated>
+  <updated>2020-11-11T00:34:51Z</updated>
+  <entry>
+    <title>This Week in Spring - November 10th, 2020</title>
+    <link rel="alternate" href="https://spring.io/blog/2020/11/11/this-week-in-spring-november-10th-2020" />
+    <category term="engineering" label="Engineering" />
+    <author>
+      <name>Josh Long</name>
+    </author>
+    <id>tag:spring.io,2020-11-11:4266</id>
+    <updated>2020-11-11T00:34:51Z</updated>
+    <content type="html">&lt;p&gt;Hi, Spring fans! Welcome to another installment of &lt;em&gt;This Week in Spring&lt;/em&gt;! It&amp;rsquo;s November 10th, 2020, as I write this and I, for one, can not believe that we&amp;rsquo;re closer to 2021 than we are to 2019 at this point. That&amp;rsquo;s insane. Time has absolutely rocketed by in some senses and stood utterly still in others. Odd year, this one. &lt;/p&gt;
+&lt;p&gt;I hope you&amp;rsquo;re all doing well! I&amp;rsquo;m at the Reactive Summit today (virtually, of course). This afternoon I was on a wonderful panel with all sorts of folks from around the ecosystem. And soon, around 17:30 or so, if memory serves, I&amp;rsquo;ll be speaking about RSocket and its use in the Spring ecosystem. &lt;/p&gt;
+&lt;p&gt;Also, tonight, I&amp;rsquo;ll be doing a presentation for Jetbrains - &lt;a href="https://twitter.com/intellijidea/status/1323497643666911232"&gt;&lt;em&gt;Bootiful Kotlin&lt;/em&gt;&lt;/a&gt;. &lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;m so looking forward to these events and I hope to see you at either or both of these presentations.&lt;/p&gt;
+&lt;p&gt;We&amp;rsquo;ve got a lot of stuff to cover this week so let&amp;rsquo;s get to it! &lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/11/05/a-bootiful-podcast-spring-legend-thomas-risberg-on-jdbc-spring-cloud-data-flow-kubernetes-and-so-much-more"&gt;A Bootiful Podcast: Spring legend Thomas Risberg on JDBC, Spring Cloud Data Flow, Kubernetes and so much more&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://tanzu.vmware.com/content/blog/announcing-general-availability-of-vmware-tanzu-kubernetes-grid-1-2"&gt;Announcing the General Availability of VMware Tanzu Kubernetes Grid 1.2&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://r2dbc.io/2020/11/10/r2dbc-joins-reactive-foundation"&gt;R2DBC joins Reactive Foundation&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://adtmag.com/blogs/watersworks/2020/11/new-reactive-manifesto.aspx?m=1"&gt;Jonas Boner on the Reactive Principles&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/11/10/new-in-spring-5-3-improved-cron-expressions"&gt;New in Spring 5.3: Improved Cron Expressions&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://blog.jetbrains.com/kotlin/2020/11/productive-server-side-development-with-kotlin-stories/"&gt;Productive Server-Side Development With Kotlin: Stories From The Industry – Kotlin Blog | JetBrains&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://www.vinsguru.com/redis-pubsub-with-spring-boot/"&gt;Redis PubSub With Spring Boot | Vinsguru&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/11/10/spring-authorization-server-0-0-3-available-now"&gt;Spring Authorization Server 0.0.3 available now&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/11/10/spring-cloud-hoxton-sr9-has-been-released"&gt;Spring Cloud Hoxton.SR9 has been released&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/11/06/spring-data-2020-0-new-and-noteworthy-a-general-overview"&gt;Spring Data 2020.0 - New and Noteworthy - A general Overview&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/11/10/spring-framework-5-3-1-and-5-2-11-available-now"&gt;Spring Framework 5.3.1 and 5.2.11 available now&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/11/04/spring-security-5-5-0-m1-released"&gt;Spring Security 5.5.0-M1 Released&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://inside.java/2020/11/05/the-record-attribute/"&gt;The Record Attribute - What does it mean to be a record at runtime?&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://blogs.vmware.com/opensource/2020/11/10/vmware-github-management/"&gt;VMware on Effective GitHub Management&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://twitter.com/RabbitMQ/status/1326114564455473152"&gt; You have a few RabbitMQ deployments, so how do you monitor them? What is the RabbitMQ Cluster Operator? What about the default metrics configuration? Can this be improved? &lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
+  </entry>
+  <entry>
+    <title>Spring Data 2020.0 - New and Noteworthy in Spring Data JDBC 2.1.</title>
+    <link rel="alternate" href="https://spring.io/blog/2020/11/10/spring-data-2020-0-new-and-noteworthy-in-spring-data-jdbc-2-1" />
+    <category term="engineering" label="Engineering" />
+    <author>
+      <name>Jens Schauder</name>
+    </author>
+    <id>tag:spring.io,2020-11-05:4260</id>
+    <updated>2020-11-10T22:00:00Z</updated>
+    <content type="html">&lt;p&gt;As part of the 2020.0.0 version of Spring Data, we released Spring Data JDBC 2.1.&lt;br/&gt;This article presents the four most interesting changes in this version.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href="#use-code-value-code-on-entity-constructor-arguments"&gt;Use &lt;code&gt;@Value&lt;/code&gt; on entity constructor arguments.&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="#rowmapper-and-resultsetextractor-as-beans"&gt;&lt;code&gt;RowMapper&lt;/code&gt; and &lt;code&gt;ResultSetExtractor&lt;/code&gt; as beans.&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="#improved-performance-for-entities"&gt;Improved performance for entities.&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="#support-of-oracles-temporal-types"&gt;Support of Oracles temporal types.&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;h1&gt;&lt;a href="#use-code-value-code-on-entity-constructor-arguments" class="anchor" name="use-code-value-code-on-entity-constructor-arguments"&gt;&lt;/a&gt;Use &lt;code&gt;@Value&lt;/code&gt; on Entity Constructor Arguments&lt;/h1&gt;
+&lt;p&gt;In some cases, not all the data that goes into an entity comes from the &lt;code&gt;ResultSet&lt;/code&gt; of a query. You now may provide an &lt;code&gt;@Value&lt;/code&gt; annotation with a SPeL expression that is evaluated, and the result is passed as an argument upon construction of the entity.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint java"&gt;private static class WithAtValue {&#xD;
+&#xD;
+  @Id private final Long id;&#xD;
+  private final @Transient String computed;&#xD;
+&#xD;
+  public WithAtValue(Long id,&#xD;
+      @Value(&amp;quot;#root.first_name&amp;quot;) String computed) {&#xD;
+    this.id = id;&#xD;
+    this.computed = computed;&#xD;
+  }&#xD;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The example accesses the &lt;code&gt;first_name&lt;/code&gt; column from the &lt;code&gt;ResultSet&lt;/code&gt;, but the SPeL context also has access to the full application context.&lt;br/&gt;Therefore, you have a flexible way to customize the instantiation of your entities.&lt;/p&gt;&lt;h1&gt;&lt;a href="#code-rowmapper-code-and-code-resultsetextractor-code-as-beans" class="anchor" name="code-rowmapper-code-and-code-resultsetextractor-code-as-beans"&gt;&lt;/a&gt;&lt;code&gt;RowMapper&lt;/code&gt; and &lt;code&gt;ResultSetExtractor&lt;/code&gt; as Beans&lt;/h1&gt;
+&lt;p&gt;When you specify the query to be executed for a repository method by using &lt;code&gt;@Query&lt;/code&gt;, you may optionally provide the type of a &lt;code&gt;RowMapper&lt;/code&gt; or &lt;code&gt;ResultSetExtractor&lt;/code&gt; implementation.&lt;br/&gt;However, since the instances created from these types are not Spring beans, they do not participate in dependency injection.&lt;br/&gt;Therefore, you cannot inject other resources that you might want to use into them.&lt;/p&gt;
+&lt;p&gt;You now may instead specify a reference to a bean that implements &lt;code&gt;RowMapper&lt;/code&gt; or &lt;code&gt;ResultSetExtractor&lt;/code&gt; bu using the &lt;code&gt;rowMapperRef&lt;/code&gt; or &lt;code&gt;resultSetExtractorRef&lt;/code&gt; &lt;code&gt;@Query&lt;/code&gt; attributes, respectively:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint java"&gt;interface CarRepository extends CrudRepository&amp;lt;Car, Long&amp;gt; {&#xD;
+&#xD;
+	@Query(value = &amp;quot;select * from car&amp;quot;, resultSetExtractorRef = &amp;quot;carResultSetExtractorBean&amp;quot;)&#xD;
+	List&amp;lt;Car&amp;gt; findByNameWithResultSetExtractor();&#xD;
+&#xD;
+	@Query(value = &amp;quot;select model from car&amp;quot;, rowMapperRef = &amp;quot;customRowMapperBean&amp;quot;)&#xD;
+	List&amp;lt;String&amp;gt; findByNameWithRowMapperBean();&#xD;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Spring Data JDB looks up the beans in the application context by name.&lt;br/&gt;Since they are normal Spring beans, you can freely inject other beans or really do anything with them that the Spring Framework has to offer.&lt;/p&gt;&lt;h1&gt;&lt;a href="#improved-performance-for-entities" class="anchor" name="improved-performance-for-entities"&gt;&lt;/a&gt;Improved Performance for Entities&lt;/h1&gt;
+&lt;p&gt;Spring Data JDBC entities can have their properties set by a constructor, by a setter, or (in the case of immutable entities) by a with-method.&lt;br/&gt;However, if a property is already set by a constructor, it should not get set by a setter or (probably worse) with-method. This avoids the cost of the method call and possibly instance creation.&lt;br/&gt;However, for this, Spring Data JDBC used to check each property to see if it has a matching constructor parameter.&lt;br/&gt;This test is surprisingly expensive and can be avoided by checking once if there is an all-arguments constructor.&lt;br/&gt;In such a case, there is no need to call any setters at all.&lt;br/&gt;With the latest version, Spring Data JDBC does exactly that, resulting in better performance for entities with all-arguments constructors.&lt;br/&gt;So a new performance tip is to provide all-argument constructors.&lt;/p&gt;&lt;h1&gt;&lt;a href="#support-of-oracles-temporal-types" class="anchor" name="support-of-oracles-temporal-types"&gt;&lt;/a&gt;Support of Oracles Temporal Types&lt;/h1&gt;
+&lt;p&gt;Spring Data JDBC has supported temporal types from the very beginning.&lt;br/&gt;However, when we added official support for Oracle, we discovered that Oracle does return a special proprietary type for temporal types that Spring Data JDBC wasn&amp;rsquo;t able to convert to the normal temporal types (such as &lt;code&gt;java.time.Instant&lt;/code&gt; or similar types).&lt;/p&gt;
+&lt;p&gt;We added support for the conversion.&lt;br/&gt;Using temporal data types should not cause more problems with Oracle than with any other database. They can still cause trouble through the power of time zones and daylight savings time, but that is not our problem to solve.&lt;/p&gt;
+&lt;p&gt;Enjoy the new features while we work on the next release.&lt;/p&gt;
+&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
+  </entry>
   <entry>
     <title>New in Spring 5.3: Improved Cron Expressions</title>
     <link rel="alternate" href="https://spring.io/blog/2020/11/10/new-in-spring-5-3-improved-cron-expressions" />
@@ -1159,67 +1240,6 @@ Artem&lt;/p&gt;
 &lt;p&gt;Please note that this release is the last feature branch of the 4.x generation. The next version will be 5.0, and we will share what&amp;rsquo;s coming in it soon, so stay tuned!&lt;/p&gt;
 &lt;p&gt;I would like to thank all contributors who made this release possible! We look forward to your feedback on this release on &lt;a href="https://twitter.com/springbatch"&gt;Twitter&lt;/a&gt;, &lt;a href="https://stackoverflow.com/questions/tagged/spring-batch"&gt;StackOverflow&lt;/a&gt;, and &lt;a href="https://github.com/spring-projects/spring-batch/issues/new/choose"&gt;Github&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://spring.io/projects/spring-batch"&gt;Spring Batch Home&lt;/a&gt; | &lt;a href="https://github.com/spring-projects/spring-batch"&gt;Source on GitHub&lt;/a&gt; | &lt;a href="https://docs.spring.io/spring-batch/docs/4.3.0/reference/html/index.html"&gt;Reference Documentation&lt;/a&gt;&lt;/p&gt;
-&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
-  </entry>
-  <entry>
-    <title>This Week in Spring - October 27th, 2020</title>
-    <link rel="alternate" href="https://spring.io/blog/2020/10/27/this-week-in-spring-october-27th-2020" />
-    <category term="engineering" label="Engineering" />
-    <author>
-      <name>Josh Long</name>
-    </author>
-    <id>tag:spring.io,2020-10-27:4241</id>
-    <updated>2020-10-27T20:53:00Z</updated>
-    <content type="html">&lt;p&gt;Hi, Spring fans! Welcome to another installment of &lt;em&gt;This Week in Spring&lt;/em&gt;! It&amp;rsquo;s already nearly November in this crazy rollercoaster ride that is 2020. Crazy. &lt;/p&gt;
-&lt;p&gt;We&amp;rsquo;ve got a ton of stuff to get to so let&amp;rsquo;s waste not a second more.&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/10/27/spring-framework-5-3-goes-ga"&gt;Spring Framework 5.3 goes GA&lt;/a&gt; This is a &lt;em&gt;huge&lt;/em&gt; release, and the most important thing we&amp;rsquo;ll look at today. Go read this post first. This release includes a &lt;em&gt;ton&lt;/em&gt; of new features!&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/10/22/a-bootiful-podcast-optic-ceo-aidan-cunniffe-on-openapi-contract-testing-and-so-much-more"&gt;A Bootiful Podcast: Optic CEO Aidan Cunniffe on OpenAPI, contract testing, and so much more&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;I loved this case study that talks about how VMware (my employer) uses Kotlin &lt;a href="https://kotlinlang.org/lp/mobile/case-studies/vmware/"&gt;Case Studies: VMware - Kotlin Multiplatform Mobile &lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/10/26/case-study-aggregator-function-and-processor"&gt;Case Study: Aggregator Function and Processor&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://twitter.com/devfestromania/status/1318551497035161601?s=12"&gt;Check out my DevFest Romania presentation - &lt;em&gt;Bootiful Kotlin&lt;/em&gt;&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://twitter.com/myfear/status/1319723269747081216?s=12"&gt; The Maven Daemon is kind of like the Gradle deamon in that its a long-running process (but one compiled using GraalVM) that can greatly speed-up the use of Apache Maven&lt;/a&gt;. Anecdotally, I&amp;rsquo;m seeing folks talk about reducing their larger, multi-module builds to 1/3 of the time.&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://www.cloudfoundry.org/blog/cloud-foundrys-proven-developer-experience-comes-to-kubernetes-with-cf-for-k8s-1-0/"&gt;Cloud Foundry’s Proven Developer Experience Comes to Kubernetes with cf-for-k8s 1.0 | Cloud Foundry&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://blogs.vmware.com/opensource/2020/10/27/choosing-a-linux-distribution/"&gt;Confessions: Choosing a Linux Distribution&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://twitter.com/jvmdeveloperid/status/1318694885562535937?s=12"&gt;I’m so looking forward to the JLove conference and I hope you&amp;rsquo;ll join us&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://inside.java/2020/10/23/jep-392-proposed-to-target-jdk16/"&gt;JEP proposed to target JDK 16: 392: Packaging Tool&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://inside.java/2020/10/26/jep-393-proposed-to-target-jdk16/"&gt;JEP proposed to target JDK 16: 393: Foreign-Memory Access API (Third Incubator)&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;I&amp;rsquo;ll be doing a webinar for &lt;a href="https://twitter.com/intellijidea/status/1318825553990873099?s=21"&gt;JetBrains (makers of IntelliJ IDEA) - &amp;lsquo;Bootiful Kotlin&amp;rsquo; - Wednesday, Nov 11th 2020, 9 - 10 am CST. Check out this blog post for session details and registration&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://www.infoq.com/news/2020/10/qcon-plus-software-leaders/"&gt;Join Gene Kim, Michael Nygard, Elisabeth Hendrickson, me, and 54 Other Software Leaders at QCon Plus&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://devblogs.microsoft.com/cosmosdb/latest-documentation-releases-for-azure-cosmos-db/?WT.mc_id=social-social-adpolak"&gt;Latest documentation releases for Azure Cosmos DB and the Spring Data Azure CosmosDB release&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://twitter.com/javaatmicrosoft/status/1320845192564408326?s=12"&gt;Microsoft wants to know your use of Spring&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://inside.java/2020/10/27/new-candidate-jep-396/"&gt;New candidate JEP: 396: Strongly Encapsulate JDK Internals by Default&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://youtu.be/1KshF3_u_KA"&gt;Paul Czarkowski demonstrates CF-4-K8s (CloudFoundry on Kubernetes). It’s the quintessential Tanzu demonstration. Watch as Paul uses Tanzu Mission Control to deploy a Tanzu Kubernetes distribution, Harbor (the container registry), and to then deploy CF-4-K8s (Cloud Foundry on Kubernetes) in.. 22 minutes!&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://twitter.com/mgrzejszczak/status/1319318784981803014?s=12"&gt;Some big changes coming to Spring Cloud Sleuth&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/10/27/spring-framework-5-2-10-and-5-1-19-available-now"&gt;Spring Framework 5.2.10 and 5.1.19 available now&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://spring.io/blog/2020/10/27/spring-tools-4-8-1-released"&gt;Spring Tools 4.8.1 released&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://spring.io/guides/topicals/spring-on-kubernetes/"&gt;Check out our new topical guide, &lt;em&gt;Spring on Kubernetes&lt;/em&gt;, written by our own Ryan Baxter&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://twitter.com/springcentral/status/1320674537399308288"&gt;Mark Heckler was recently on the &lt;em&gt;Path to Principal&lt;/em&gt; podcast discussing software development, Spring, and the upcoming release of his book Spring Boot: Up and Running. Listen here &lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://github.com/spencergibb/spring-cloud-bus-rsocket-sample"&gt; Check out this awesome sample app that uses &lt;code&gt;spring-cloud-bus&lt;/code&gt; with RSocket Routing as the transport&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
-  </entry>
-  <entry>
-    <title>Spring Framework 5.3 goes GA</title>
-    <link rel="alternate" href="https://spring.io/blog/2020/10/27/spring-framework-5-3-goes-ga" />
-    <category term="releases" label="Releases" />
-    <author>
-      <name>Juergen Hoeller</name>
-    </author>
-    <id>tag:spring.io,2020-10-27:4238</id>
-    <updated>2020-10-27T17:28:00Z</updated>
-    <content type="html">&lt;p&gt;Dear Spring community,&lt;/p&gt;
-&lt;p&gt;On behalf of the Spring Framework team and our contributors, it is my pleasure to announce that Spring Framework 5.3 is generally available from &lt;a href="https://repo.spring.io"&gt;repo.spring.io&lt;/a&gt; as well as Maven Central!&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href="https://github.com/spring-projects/spring-framework/wiki/What's-New-in-Spring-Framework-5.x#whats-new-in-version-53"&gt;What&amp;rsquo;s New&lt;/a&gt; in Spring Framework 5.3&lt;/li&gt;
-  &lt;li&gt;&lt;a href="https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-5.x#upgrading-to-version-53"&gt;Upgrading&lt;/a&gt; to Spring Framework 5.3&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Spring Framework 5.3 requires JDK 8 or higher and specifically embraces &lt;a href="http://openjdk.java.net/projects/jdk/15/"&gt;JDK 15&lt;/a&gt; as the latest OpenJDK release, e.g. with binding support for record classes. As the last feature branch of the 5.x generation, the 5.3.x line is set up for an extended support phase, including JDK 17 LTS next year.&lt;/p&gt;
-&lt;p&gt;The immediate Spring Boot 2.4 and next year&amp;rsquo;s Spring Boot 2.5 release will be based on this framework generation, as well as the incubating support for &lt;a href="https://github.com/spring-projects-experimental/spring-graalvm-native"&gt;Spring native executables on GraalVM&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;This release includes core &lt;a href="https://r2dbc.io/"&gt;R2DBC&lt;/a&gt; support in the spring-r2dbc module, serving as the foundation for Spring Data R2DBC, and introduces query result streaming for JdbcTemplate. It also comes with &lt;a href="https://github.com/Kotlin/kotlinx.serialization"&gt;Kotlin multiplatform serialization&lt;/a&gt; support for web and messaging endpoints with JSON payloads, and with &lt;a href="https://github.com/rsocket/rsocket-java#rsocket"&gt;RSocket 1.1&lt;/a&gt; support taking advantage of the new RSocketClient and exposing load-balancing.&lt;/p&gt;
-&lt;p&gt;Spring MVC users can get better performance with PathPattern parsing (see Rossen&amp;rsquo;s &lt;a href="https://spring.io/blog/2020/06/30/url-matching-with-pathpattern-in-spring-mvc"&gt;blog post&lt;/a&gt;). For test scenarios, we provide a unified API for MockMvc as well as full HTTP tests, and MockMvc comes with a revised Kotlin DSL. On the WebFlux side, a fully reactive message reader for multipart requests is included now, as well as a WebClient connector for &lt;a href="https://hc.apache.org/httpcomponents-client-5.0.x/"&gt;Apache Http Components 5&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Spring Framework 5.3 is a recommended upgrade for all 5.x and 4.x users. It establishes a stable and future-proof production branch with extended maintenance until 2024, serving as the successor of the equally long-lived 4.3.x line which will reach its end of maintenance soon (December 2020).&lt;/p&gt;
-&lt;p&gt;Cheers,&lt;br/&gt;Juergen&lt;/p&gt;
 &lt;!-- rendered by Sagan Renderer Service --&gt;</content>
   </entry>
 </feed>
