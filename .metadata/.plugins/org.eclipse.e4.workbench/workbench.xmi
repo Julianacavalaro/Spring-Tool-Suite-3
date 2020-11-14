@@ -11,6 +11,7 @@
     <persistedState key="workingSets" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xD;&#xA;&lt;workingSets/>"/>
     <persistedState key="aggregateWorkingSetId" value="Aggregate for window 1603909603080"/>
     <tags>topLevel</tags>
+    <tags>shellMaximized</tags>
     <children xsi:type="basic:PartSashContainer" xmi:id="_QSVFUiLHEeuDrrq3wBHa7Q" selectedElement="_QSVFUyLHEeuDrrq3wBHa7Q" horizontal="true">
       <children xsi:type="advanced:PerspectiveStack" xmi:id="_QSVFUyLHEeuDrrq3wBHa7Q" elementId="org.eclipse.ui.ide.perspectivestack" containerData="7500" selectedElement="_QSVFVCLHEeuDrrq3wBHa7Q">
         <children xsi:type="advanced:Perspective" xmi:id="_QSVFVCLHEeuDrrq3wBHa7Q" elementId="com.springsource.sts.ide.perspective" selectedElement="_6q1mACUXEeu2_t3CjDE2AQ" label="Spring" iconURI="platform:/plugin/org.springframework.ide.eclipse.ui/icons/full/obj16/spring_perspective.gif">
@@ -266,7 +267,7 @@
           <tags>org.eclipse.jdt.ui.CompilationUnitEditor</tags>
         </children>
         <children xsi:type="basic:Part" xmi:id="_eAu-cCaKEeumK8sD-HcsSg" elementId="org.eclipse.e4.ui.compatibility.editor" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityEditor" label="BasicSecurityConfig.java" iconURI="platform:/plugin/org.eclipse.jdt.ui/icons/full/obj16/jcu_obj.png" closeable="true">
-          <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xD;&#xA;&lt;editor id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;BasicSecurityConfig.java&quot; partName=&quot;BasicSecurityConfig.java&quot; title=&quot;BasicSecurityConfig.java&quot; tooltip=&quot;blogPessoal/src/main/java/org/generation/blogPessoal/seguranca/BasicSecurityConfig.java&quot;>&#xD;&#xA;&lt;input factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; path=&quot;/blogPessoal/src/main/java/org/generation/blogPessoal/seguranca/BasicSecurityConfig.java&quot;/>&#xD;&#xA;&lt;editorState selectionHorizontalPixel=&quot;0&quot; selectionLength=&quot;0&quot; selectionOffset=&quot;90&quot; selectionTopPixel=&quot;0&quot;/>&#xD;&#xA;&lt;/editor>"/>
+          <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xD;&#xA;&lt;editor id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;BasicSecurityConfig.java&quot; partName=&quot;BasicSecurityConfig.java&quot; title=&quot;BasicSecurityConfig.java&quot; tooltip=&quot;blogPessoal/src/main/java/org/generation/blogPessoal/seguranca/BasicSecurityConfig.java&quot;>&#xD;&#xA;&lt;input factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; path=&quot;/blogPessoal/src/main/java/org/generation/blogPessoal/seguranca/BasicSecurityConfig.java&quot;/>&#xD;&#xA;&lt;editorState selectionHorizontalPixel=&quot;0&quot; selectionLength=&quot;0&quot; selectionOffset=&quot;91&quot; selectionTopPixel=&quot;0&quot;/>&#xD;&#xA;&lt;/editor>"/>
           <tags>Editor</tags>
           <tags>removeOnHide</tags>
           <tags>org.eclipse.jdt.ui.CompilationUnitEditor</tags>
@@ -492,7 +493,7 @@
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_QSWUyiLHEeuDrrq3wBHa7Q" elementId="org.eclipse.ui.workbench.file">
         <tags>Draggable</tags>
-        <children xsi:type="menu:HandledToolItem" xmi:id="_aAyT4CaGEeumK8sD-HcsSg" elementId="print" visible="false" iconURI="platform:/plugin/org.eclipse.ui/icons/full/etool16/print_edit.png" tooltip="Print" command="_QSZW-yLHEeuDrrq3wBHa7Q"/>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_fdY3wCaMEeuc6bD-d6CYmw" elementId="print" visible="false" iconURI="platform:/plugin/org.eclipse.ui/icons/full/etool16/print_edit.png" tooltip="Print" command="_QSZW-yLHEeuDrrq3wBHa7Q"/>
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_QSWU1yLHEeuDrrq3wBHa7Q" elementId="group.edit" toBeRendered="false">
         <tags>toolbarSeparator</tags>
@@ -526,7 +527,7 @@
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_QSWVNCLHEeuDrrq3wBHa7Q" elementId="org.eclipse.ui.workbench.navigate">
         <tags>Draggable</tags>
-        <children xsi:type="menu:HandledToolItem" xmi:id="_aAyT7SaGEeumK8sD-HcsSg" elementId="org.eclipse.ui.window.pinEditor" iconURI="platform:/plugin/org.eclipse.ui/icons/full/etool16/pin_editor.png" tooltip="Pin Editor" type="Check" command="_QSYzhiLHEeuDrrq3wBHa7Q"/>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_fdY3zSaMEeuc6bD-d6CYmw" elementId="org.eclipse.ui.window.pinEditor" iconURI="platform:/plugin/org.eclipse.ui/icons/full/etool16/pin_editor.png" tooltip="Pin Editor" type="Check" command="_QSYzhiLHEeuDrrq3wBHa7Q"/>
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_QSWVQiLHEeuDrrq3wBHa7Q" elementId="group.editor" toBeRendered="false">
         <tags>toolbarSeparator</tags>
