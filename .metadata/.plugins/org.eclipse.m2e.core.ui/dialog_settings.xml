@@ -4,4 +4,19 @@
 	</section>
 	<section name="org.eclipse.m2e.core.pom.dependencies">
 	</section>
+	<section name="MavenProjectImportWizardPage">
+		<list key="rootDirectory">
+			<item value="C:\Users\Julia\Downloads\base_aula2_junit-main"/>
+			<item value="C:\Users\Julia\Downloads\junit-base-main"/>
+		</list>
+		<list key="projectNameTemplate">
+			<item value="aulaJUnit2"/>
+			<item value="[artifactId]"/>
+			<item value="[artifactId]-TRUNK"/>
+			<item value="[artifactId]-[version]"/>
+			<item value="[groupId].[artifactId]"/>
+			<item value="[groupId].[artifactId]-[version]"/>
+			<item value="[name]"/>
+		</list>
+	</section>
 </section>

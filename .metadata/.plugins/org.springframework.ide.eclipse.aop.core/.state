@@ -3,7 +3,9 @@
 <aop-project name="drogaria"/>
 <aop-project name="helloAtividade1"/>
 <aop-project name="helloAtividade2"/>
+<aop-project name="aulaJUnit2"/>
 <aop-project name="webmvc"/>
+<aop-project name="bancodedados"/>
 <aop-project name="minhaLojaDeGames"/>
 <aop-project name="dados2"/>
 <aop-project name="blogPessoal"/>
