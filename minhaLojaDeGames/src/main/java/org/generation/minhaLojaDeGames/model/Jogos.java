@@ -24,8 +24,6 @@ public class Jogos {
 	@ManyToOne
 	@JsonIgnoreProperties("jogos")
 	private Categoria categoria;
-
-	
 	
 	public Categoria getCategoria() {
 		return categoria;
