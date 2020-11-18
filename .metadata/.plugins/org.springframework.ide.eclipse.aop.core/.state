@@ -5,6 +5,7 @@
 <aop-project name="helloAtividade2"/>
 <aop-project name="aulaJUnit2"/>
 <aop-project name="webmvc"/>
+<aop-project name="rest"/>
 <aop-project name="bancodedados"/>
 <aop-project name="minhaLojaDeGames"/>
 <aop-project name="dados2"/>

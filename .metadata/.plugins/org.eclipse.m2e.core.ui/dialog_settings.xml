@@ -6,6 +6,7 @@
 	</section>
 	<section name="MavenProjectImportWizardPage">
 		<list key="rootDirectory">
+			<item value="C:\Users\Julia\Desktop\teste"/>
 			<item value="C:\Users\Julia\Downloads\base_aula2_junit-main"/>
 			<item value="C:\Users\Julia\Downloads\junit-base-main"/>
 		</list>
